@@ -16,12 +16,6 @@
     <Filter Include="HttpServer">
       <UniqueIdentifier>{07a00b7e-49b6-4e4b-984c-c6cf47ab7a6f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HttpServer\Common">
-      <UniqueIdentifier>{20092ae4-81d9-4429-a489-78ec80995228}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HttpServer\Global">
-      <UniqueIdentifier>{78aa437e-cf49-4e50-87e6-a4489dd36472}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -33,6 +27,9 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="bgHttpServerImp.h">
+      <Filter>HttpServer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -40,6 +37,9 @@
     </ClCompile>
     <ClCompile Include="bgHttpServer.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bgHttpServerImp.cpp">
+      <Filter>HttpServer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
