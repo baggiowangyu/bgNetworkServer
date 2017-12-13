@@ -140,3 +140,127 @@ void bgHttpServerImp::OnDestroy()
 	// 销毁监听器对象
 	::Destroy_HP_HttpServerListener(http_server_listener_);
 }
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////////
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnPrepareListen(HP_Server pSender, SOCKET soListen)
+{
+	// 什么都不做，直接返回OK
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
+{
+	// 这里是指有客户端连进来的情况
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnHandShake(HP_Server pSender, HP_CONNID dwConnID)
+{
+	// 什么都不做，直接返回OK
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
+{
+	// 这里是指接收数据
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
+{
+	// 这里是指发送数据
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnClose(HP_Server pSender, HP_CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+{
+	// 这里是指关闭
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnShutdown(HP_Server pSender)
+{
+	// 什么都不做，直接返回OK
+	return HR_OK;
+}
+
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageBegin(HP_HttpServer pSender, HP_CONNID dwConnID)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnRequestLine(HP_HttpServer pSender, HP_CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeader(HP_HttpServer pSender, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
+{
+	// 这里HTTP头部已经接收完成，可以通过
+	// unique_ptr<THeader[]> headers(new THeader[dwHeaderCount]);
+	// VERIFY(::HP_HttpServer_GetAllHeaders(pSender, dwConnID, headers.get(), &dwHeaderCount));
+	// 获取所有头部数据
+
+	// unique_ptr<TCookie[]> cookies(new TCookie[dwCookieCount]);
+	// VERIFY(::HP_HttpServer_GetAllCookies(pSender, dwConnID, cookies.get(), &dwCookieCount));
+	// 获取所有cookie
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnBody(HP_HttpServer pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnChunkHeader(HP_HttpServer pSender, HP_CONNID dwConnID, int iLength)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnChunkComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
+{
+	// 这里是HTTP消息体接收完毕
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnUpgrade(HP_HttpServer pSender, HP_CONNID dwConnID, EnHttpUpgradeType enUpgradeType)
+{
+	return HPR_OK;
+}
+
+En_HP_HttpParseResult __stdcall bgHttpServerImp::OnParseError(HP_HttpServer pSender, HP_CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc)
+{
+	return HPR_OK;
+}
+
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageHeader(HP_HttpServer pSender, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)
+{
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageBody(HP_HttpServer pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
+{
+	return HR_OK;
+}
+
+En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
+{
+	return HR_OK;
+}
