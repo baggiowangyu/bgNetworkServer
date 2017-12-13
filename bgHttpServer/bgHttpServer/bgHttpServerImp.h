@@ -43,12 +43,19 @@ public:
 
 public:
 	int OnInit();
+	int OnStart(const TCHAR *server_ip = _T("0.0.0.0"), USHORT http_port = 80, USHORT https_port = 8443);
+	void OnDestroy();
 
 public:
 	HP_HttpServer http_server_;
 	HP_HttpsServer https_server_;
 
 	HP_HttpServerListener http_server_listener_;
+
+//public:
+//	TCHAR server_ip_[4096];
+//	USHORT http_port_;
+//	USHORT https_port_;
 };
 
 #endif//_BG_HTTP_SERVER_IMP_H_
