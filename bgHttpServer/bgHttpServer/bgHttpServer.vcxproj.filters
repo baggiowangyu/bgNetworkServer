@@ -16,6 +16,12 @@
     <Filter Include="HttpServer">
       <UniqueIdentifier>{07a00b7e-49b6-4e4b-984c-c6cf47ab7a6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Business">
+      <UniqueIdentifier>{a8a036c6-b63e-4265-8110-04e39e2bc326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="会话管理">
+      <UniqueIdentifier>{63cefb9c-6ae6-4d8b-ba3f-83e6e8317721}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -29,6 +35,9 @@
     </ClInclude>
     <ClInclude Include="bgHttpServerImp.h">
       <Filter>HttpServer</Filter>
+    </ClInclude>
+    <ClInclude Include="bgHttpBusinessPlugins.h">
+      <Filter>Business</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
