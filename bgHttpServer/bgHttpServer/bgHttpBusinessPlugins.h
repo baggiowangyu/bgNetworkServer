@@ -11,7 +11,13 @@ class bgHttpBusinessPlugins
 {
 public:
 	/**
-	 * 设置HTTP实体数据总长度
+	 * 判断是否为自己关心的消息，在HTTP头处理完毕之后就可以判断
+	 * 如果是，并且有附带数据，则设置实体数据总长度
+	 */
+	virtual bool IsMyMsg(const char *path) = 0;
+
+	/**
+	 * 设置HTTP实体数据总长度，准备好相应的
 	 */
 	virtual int SetHttpContentLength(int data_len) = 0;
 
