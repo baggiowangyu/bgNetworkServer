@@ -1,4 +1,5 @@
 #include "bgHttpServerImp.h"
+#include "bgPluginManagement.h"
 
 #include <iostream>
 #include <atlconv.h>
@@ -26,13 +27,15 @@ int SPECIAL_SERVER_INDEX = -1;
 #endif
 
 bgHttpServerImp::bgHttpServerImp()
+	: plugin_management_(new bgPluginManagement())
 {
 	
 }
 
 bgHttpServerImp::~bgHttpServerImp()
 {
-
+	delete plugin_management_;
+	plugin_management_ = nullptr;
 }
 
 int CALLBACK bgHttpServerImp::SIN_ServerNameCallback(LPCTSTR lpszServerName)
@@ -99,6 +102,13 @@ int bgHttpServerImp::OnInit()
 	::HP_Set_FN_HttpServer_OnWSMessageHeader(http_server_listener_, OnWSMessageHeader);
 	::HP_Set_FN_HttpServer_OnWSMessageBody(http_server_listener_, OnWSMessageBody);
 	::HP_Set_FN_HttpServer_OnWSMessageComplete(http_server_listener_, OnWSMessageComplete);
+
+	//////////////////////////////////////////////////////////////////////////
+	//
+	// 加载业务插件
+	//
+	//////////////////////////////////////////////////////////////////////////
+	plugin_management_->
 
 	return errCode;
 }

@@ -32,7 +32,7 @@ public:
 	/**
 	 * 处理请求数据
 	 */
-	virtual int HandleRequest() = 0;
+	virtual int HandleRequest(const char *path, const char *query) = 0;
 };
 
 #endif//_BG_HTTP_BUSINESS_PLUGINS_H_

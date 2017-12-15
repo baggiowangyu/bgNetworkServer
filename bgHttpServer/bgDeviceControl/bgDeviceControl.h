@@ -34,7 +34,7 @@ public:
 	/**
 	 * 处理请求数据
 	 */
-	virtual int HandleRequest();
+	virtual int HandleRequest(const char *path, const char *query);
 
 public:
 	std::string cache_file_path_;

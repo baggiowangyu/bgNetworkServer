@@ -8,6 +8,8 @@
 
 #include "HPSocket4C-SSL.h"
 
+class bgPluginManagement;
+
 class bgHttpServerImp
 {
 public:
@@ -51,6 +53,9 @@ public:
 	HP_HttpsServer https_server_;
 
 	HP_HttpServerListener http_server_listener_;
+
+public:
+	bgPluginManagement *plugin_management_;
 
 //public:
 //	TCHAR server_ip_[4096];
