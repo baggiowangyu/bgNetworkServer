@@ -85,12 +85,14 @@
   <ItemGroup>
     <ClInclude Include="bgHttpBusinessPlugins.h" />
     <ClInclude Include="bgHttpServerImp.h" />
+    <ClInclude Include="bgPluginManagement.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgHttpServer.cpp" />
     <ClCompile Include="bgHttpServerImp.cpp" />
+    <ClCompile Include="bgPluginManagement.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

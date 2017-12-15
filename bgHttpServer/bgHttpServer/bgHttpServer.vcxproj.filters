@@ -22,6 +22,9 @@
     <Filter Include="会话管理">
       <UniqueIdentifier>{63cefb9c-6ae6-4d8b-ba3f-83e6e8317721}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PluginManagment">
+      <UniqueIdentifier>{739cf734-ddd8-4d5b-9e24-f3d30d424e33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -39,6 +42,9 @@
     <ClInclude Include="bgHttpBusinessPlugins.h">
       <Filter>Business</Filter>
     </ClInclude>
+    <ClInclude Include="bgPluginManagement.h">
+      <Filter>PluginManagment</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -49,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="bgHttpServerImp.cpp">
       <Filter>HttpServer</Filter>
+    </ClCompile>
+    <ClCompile Include="bgPluginManagement.cpp">
+      <Filter>PluginManagment</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

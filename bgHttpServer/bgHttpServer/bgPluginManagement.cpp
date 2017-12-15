@@ -78,6 +78,7 @@ int bgPluginManagement::RemovePlugin(std::string plugin_name)
 
 void bgPluginManagement::CleanupAllPlugins()
 {
+
 	plugins_.clear();
 }
 
