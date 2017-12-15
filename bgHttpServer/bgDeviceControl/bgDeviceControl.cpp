@@ -55,7 +55,7 @@ int bgDeviceControl::CacheHttpContentData(const unsigned char *data, int data_le
 	return errCode;
 }
 
-int bgDeviceControl::HandleRequest()
+int bgDeviceControl::HandleRequest(const char *path, const char *query)
 {
 	int errCode = 0;
 

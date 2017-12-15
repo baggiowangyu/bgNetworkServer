@@ -251,6 +251,15 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer
 
 	// 在这里处理会话信息
 	// 如果会话不存在，则重新创建会话
+	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
+
+	// 遍历所有业务插件，将消息分发进去
+	bgHttpBusinessPlugins *plugin = plugin_management_->GetFirstPlugin();
+
+	do 
+	{
+		plugin->IsMyMsg(path);
+	} while ((plugin = plugin_management_->GetNextPlugin()) != nullptr);
 
 	std::cout<<"bgHttpServerImp::OnHeadersComplete connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;

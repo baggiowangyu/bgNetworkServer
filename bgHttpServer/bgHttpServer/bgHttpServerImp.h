@@ -55,7 +55,7 @@ public:
 	HP_HttpServerListener http_server_listener_;
 
 public:
-	bgPluginManagement *plugin_management_;
+	static bgPluginManagement *plugin_management_;
 
 //public:
 //	TCHAR server_ip_[4096];
