@@ -17,12 +17,31 @@ bgDeviceControl::~bgDeviceControl()
 
 }
 
-bool bgDeviceControl::IsMyMsg(const char *path)
+int bgDeviceControl::Init(const char *config_ini)
+{
+	int errCode = 0;
+
+	return errCode;
+}
+
+bool bgDeviceControl::IsMyMsg(unsigned long connect_id, const char *method, const char *path)
 {
 	if (_stricmp(path, CURRENT_MODULE_PATH) != 0)
 		return false;
 	else
-		return true;
+	{
+		if (_stricmp(method, "GET") == 0)
+			return true;
+		else if (_stricmp(method, "POST") == 0)
+		{
+			// 生成一个用文件名，用于写
+		}
+		else
+		{
+
+		}
+	}
+		
 }
 
 int bgDeviceControl::SetHttpContentLength(int data_len)
@@ -55,12 +74,35 @@ int bgDeviceControl::CacheHttpContentData(const unsigned char *data, int data_le
 	return errCode;
 }
 
-int bgDeviceControl::HandleRequest(const char *path, const char *query)
+int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method, const char *path, const char *query /* = nullptr */)
 {
 	int errCode = 0;
 
-	// 读取文件，处理请求
-	// 文件内容应当是一个json
+	if (_stricmp("GET", method) == 0)
+	{
+		if (!IsMyMsg(path))
+			errCode = ERROR_NOT_SUPPORTED;
+		else
+		{
+
+		}
+
+	}
+	else if (_stricmp("POST", method) == 0)
+	{
+		if (!IsMyMsg(path))
+			errCode = ERROR_NOT_SUPPORTED;
+		else
+		{
+
+		}
+	}
+	else
+	{
+		errCode = ERROR_NOT_SUPPORTED;
+	}
+
+	// 处理完毕之后返回处理结果
 
 	return errCode;
 }

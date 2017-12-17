@@ -43,7 +43,7 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name, bgHttpBusinessPlu
 	}
 
 	// ´´½¨ÊµÀý
-	bgHttpBusinessPlugins* plugin = ptr_CreateObject();
+	plugin = ptr_CreateObject();
 	if (plugin == nullptr)
 	{
 		errCode = ERROR_NOT_FOUND;

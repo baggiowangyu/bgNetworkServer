@@ -26,16 +26,16 @@ int SPECIAL_SERVER_INDEX = -1;
 #define SRV_PIN_2		_T("ppmm")		// 服务器用的SSL私钥证书密钥
 #endif
 
+bgPluginManagement plugin_management_;
+
 bgHttpServerImp::bgHttpServerImp()
-	: plugin_management_(new bgPluginManagement())
 {
 	
 }
 
 bgHttpServerImp::~bgHttpServerImp()
 {
-	delete plugin_management_;
-	plugin_management_ = nullptr;
+
 }
 
 int CALLBACK bgHttpServerImp::SIN_ServerNameCallback(LPCTSTR lpszServerName)
@@ -108,7 +108,7 @@ int bgHttpServerImp::OnInit()
 	// 加载业务插件
 	//
 	//////////////////////////////////////////////////////////////////////////
-	plugin_management_->
+	
 
 	return errCode;
 }
@@ -240,26 +240,18 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeader(HP_HttpServer pSender,
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
 {
-	// 这里HTTP头部已经接收完成，可以通过
-	// unique_ptr<THeader[]> headers(new THeader[dwHeaderCount]);
-	// VERIFY(::HP_HttpServer_GetAllHeaders(pSender, dwConnID, headers.get(), &dwHeaderCount));
-	// 获取所有头部数据
-
-	// unique_ptr<TCookie[]> cookies(new TCookie[dwCookieCount]);
-	// VERIFY(::HP_HttpServer_GetAllCookies(pSender, dwConnID, cookies.get(), &dwCookieCount));
-	// 获取所有cookie
-
-	// 在这里处理会话信息
-	// 如果会话不存在，则重新创建会话
+	LPCSTR method = ::HP_HttpServer_GetMethod(pSender, dwConnID);
 	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
+	LPCSTR query = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY);
 
 	// 遍历所有业务插件，将消息分发进去
-	bgHttpBusinessPlugins *plugin = plugin_management_->GetFirstPlugin();
+	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
 
 	do 
 	{
-		plugin->IsMyMsg(path);
-	} while ((plugin = plugin_management_->GetNextPlugin()) != nullptr);
+		plugin->IsMyMsg(dwConnID, method, path);
+
+	} while ((plugin = plugin_management_.GetNextPlugin()) != nullptr);
 
 	std::cout<<"bgHttpServerImp::OnHeadersComplete connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
@@ -328,6 +320,24 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	std::cout<<"client content_encoding : "<<((::HP_HttpServer_GetContentEncoding(pSender, dwConnID) == NULL) ? "None" : (::HP_HttpServer_GetContentEncoding(pSender, dwConnID)))<<std::endl;
 
 	std::cout<<"bgHttpServerImp::OnMessageComplete Finish ==========="<<std::endl;
+
+	// 我们直接在这里处理相关业务
+	// 至于POST的数据，应该要与ConnectID挂钩
+	LPCSTR method = ::HP_HttpServer_GetMethod(pSender, dwConnID);
+	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
+	LPCSTR query = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY);
+
+	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
+
+	do 
+	{
+		if (plugin->IsMyMsg(dwConnID, method, path))
+		{
+			// 处理请求
+			plugin->HandleRequest(dwConnID, method, path, query);
+		}
+	} while ((plugin = plugin_management_.GetFirstPlugin()) != nullptr);
+
 	return HPR_OK;
 }
 

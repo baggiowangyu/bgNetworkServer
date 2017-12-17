@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "业务插件", "业务插�
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bgDeviceControl", "bgDeviceControl\bgDeviceControl.vcxproj", "{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "车载客户端", "车载客户端", "{8C335597-9DE1-4199-A185-0F95D871C15A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bgCarEndpoint", "bgCarEndpoint\bgCarEndpoint.vcxproj", "{85D34289-BFA2-43F2-B421-BCC48A7EED20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,11 +25,16 @@ Global
 		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}.Debug|Win32.Build.0 = Debug|Win32
 		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}.Release|Win32.ActiveCfg = Release|Win32
 		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}.Release|Win32.Build.0 = Release|Win32
+		{85D34289-BFA2-43F2-B421-BCC48A7EED20}.Debug|Win32.ActiveCfg = Debug|Win32
+		{85D34289-BFA2-43F2-B421-BCC48A7EED20}.Debug|Win32.Build.0 = Debug|Win32
+		{85D34289-BFA2-43F2-B421-BCC48A7EED20}.Release|Win32.ActiveCfg = Release|Win32
+		{85D34289-BFA2-43F2-B421-BCC48A7EED20}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60} = {67773A47-3205-41F2-BFE9-CAD2CFBFF5C0}
+		{85D34289-BFA2-43F2-B421-BCC48A7EED20} = {8C335597-9DE1-4199-A185-0F95D871C15A}
 	EndGlobalSection
 EndGlobal
