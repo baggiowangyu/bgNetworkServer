@@ -17,7 +17,7 @@ public:
 	/**
 	 * 初始化配置信息
 	 */
-	virtual int Init(const char *config_ini) = 0;
+	virtual int Init(const char *config_ini);
 
 	/**
 	 * 判断是否为自己关心的消息，在HTTP头处理完毕之后就可以判断

@@ -35,10 +35,11 @@ bool bgDeviceControl::IsMyMsg(unsigned long connect_id, const char *method, cons
 		else if (_stricmp(method, "POST") == 0)
 		{
 			// 生成一个用文件名，用于写
+			return true;
 		}
 		else
 		{
-
+			return false;
 		}
 	}
 		
@@ -80,7 +81,7 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 
 	if (_stricmp("GET", method) == 0)
 	{
-		if (!IsMyMsg(path))
+		if (!IsMyMsg(connect_id, method, path))
 			errCode = ERROR_NOT_SUPPORTED;
 		else
 		{
@@ -90,7 +91,7 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 	}
 	else if (_stricmp("POST", method) == 0)
 	{
-		if (!IsMyMsg(path))
+		if (!IsMyMsg(connect_id, method, path))
 			errCode = ERROR_NOT_SUPPORTED;
 		else
 		{

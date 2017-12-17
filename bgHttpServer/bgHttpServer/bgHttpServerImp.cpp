@@ -55,11 +55,12 @@ int CALLBACK bgHttpServerImp::SIN_ServerNameCallback(LPCTSTR lpszServerName)
 	return SPECIAL_SERVER_INDEX;
 }
 
-int bgHttpServerImp::OnInit()
+int bgHttpServerImp::OnInit(const char *config_ini)
 {
 	int errCode = 0;
 
 	// 前期准备工作，读取配置文件
+	
 
 	// 创建HTTP服务监听器对象
 	http_server_listener_ = ::Create_HP_HttpServerListener();
