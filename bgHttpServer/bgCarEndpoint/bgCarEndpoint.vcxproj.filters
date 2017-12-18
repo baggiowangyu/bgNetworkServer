@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="HttpClient">
+      <UniqueIdentifier>{9dbbdc28-808e-4fcb-b518-a95e5f1f36ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="信令生成">
+      <UniqueIdentifier>{d5ad66b9-59ea-4476-b614-45d0ae0edc7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -39,6 +45,9 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="bgHttpClientImp.h">
+      <Filter>HttpClient</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgCarEndpoint.cpp">
@@ -49,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bgHttpClientImp.cpp">
+      <Filter>HttpClient</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

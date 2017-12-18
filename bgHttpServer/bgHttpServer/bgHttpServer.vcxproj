@@ -59,7 +59,8 @@
       <AdditionalDependencies>HPSocket4C-SSL_U.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)</Command>
+      <Command>COPY $(ProjectDir)config.ini $(OutDir)
+XCOPY /D $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,6 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="config.ini" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

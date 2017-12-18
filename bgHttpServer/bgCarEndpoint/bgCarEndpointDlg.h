@@ -5,6 +5,8 @@
 #pragma once
 #include "afxwin.h"
 
+class bgHttpClientImp;
+
 
 // CbgCarEndpointDlg ¶Ô»°¿ò
 class CbgCarEndpointDlg : public CDialogEx
@@ -32,6 +34,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CListBox m_cControlInfo;
+	CEdit m_cServerIp;
+	CEdit m_cServerPort;
+
+public:
 	afx_msg void OnBnClickedBtnUp();
 	afx_msg void OnBnClickedBtnRightUp();
 	afx_msg void OnBnClickedBtnRight();
@@ -46,4 +52,10 @@ public:
 	afx_msg void OnBnClickedBtnFocalDistanceMinus();
 	afx_msg void OnBnClickedBtnAperyurePlus();
 	afx_msg void OnBnClickedBtnAperyureMinus();
+	afx_msg void OnBnClickedBtnConnect();
+
+private:
+	bgHttpClientImp *http_client_;
+public:
+	afx_msg void OnBnClickedBtnRealvideo();
 };

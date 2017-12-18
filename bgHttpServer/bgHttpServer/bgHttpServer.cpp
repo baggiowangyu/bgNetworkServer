@@ -8,7 +8,7 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bgHttpServerImp http_server;
-	int errCode = http_server.OnInit();
+	int errCode = http_server.OnInit("config.ini");
 	errCode = http_server.OnStart(_T("0.0.0.0"), 9876, 8765);
 
 	while (true)

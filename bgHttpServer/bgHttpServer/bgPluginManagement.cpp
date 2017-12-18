@@ -13,7 +13,7 @@ bgPluginManagement::~bgPluginManagement()
 
 }
 
-int bgPluginManagement::InstallPlugin(std::string plugin_name, bgHttpBusinessPlugins* plugin, std::string path)
+int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path)
 {
 	int errCode = 0;
 
@@ -43,7 +43,7 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name, bgHttpBusinessPlu
 	}
 
 	// ´´½¨ÊµÀý
-	plugin = ptr_CreateObject();
+	bgHttpBusinessPlugins *plugin = ptr_CreateObject();
 	if (plugin == nullptr)
 	{
 		errCode = ERROR_NOT_FOUND;
@@ -54,6 +54,7 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name, bgHttpBusinessPlu
 	PLUGIN_INFO plugin_info;
 	plugin_info.plugin_object_ = plugin;
 	plugin_info.destructor_ = ptr_DestroyObject;
+	plugin_info.module_handle_ = hMod;
 
 	plugins_.insert(std::pair<std::string, PLUGIN_INFO>(plugin_name, plugin_info));
 

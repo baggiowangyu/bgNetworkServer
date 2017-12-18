@@ -24,7 +24,7 @@ public:
 	~bgPluginManagement();
 
 public:
-	int InstallPlugin(std::string plugin_name, bgHttpBusinessPlugins* plugin, std::string path);
+	int InstallPlugin(std::string plugin_name, std::string path);
 	int RemovePlugin(std::string plugin_name);
 	void CleanupAllPlugins();
 

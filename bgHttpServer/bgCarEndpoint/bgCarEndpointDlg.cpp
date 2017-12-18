@@ -7,6 +7,9 @@
 #include "bgCarEndpointDlg.h"
 #include "afxdialogex.h"
 
+#include "bgHttpClientImp.h"
+#include "json/json.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -50,6 +53,7 @@ END_MESSAGE_MAP()
 
 CbgCarEndpointDlg::CbgCarEndpointDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CbgCarEndpointDlg::IDD, pParent)
+	, http_client_(new bgHttpClientImp())
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -58,6 +62,8 @@ void CbgCarEndpointDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_INFO, m_cControlInfo);
+	DDX_Control(pDX, IDC_EDIT_SERVER_IP, m_cServerIp);
+	DDX_Control(pDX, IDC_EDIT_SERVER_PORT, m_cServerPort);
 }
 
 BEGIN_MESSAGE_MAP(CbgCarEndpointDlg, CDialogEx)
@@ -78,6 +84,8 @@ BEGIN_MESSAGE_MAP(CbgCarEndpointDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_FOCAL_DISTANCE_MINUS, &CbgCarEndpointDlg::OnBnClickedBtnFocalDistanceMinus)
 	ON_BN_CLICKED(IDC_BTN_APERYURE_PLUS, &CbgCarEndpointDlg::OnBnClickedBtnAperyurePlus)
 	ON_BN_CLICKED(IDC_BTN_APERYURE_MINUS, &CbgCarEndpointDlg::OnBnClickedBtnAperyureMinus)
+	ON_BN_CLICKED(IDC_BTN_CONNECT, &CbgCarEndpointDlg::OnBnClickedBtnConnect)
+	ON_BN_CLICKED(IDC_BTN_REALVIDEO, &CbgCarEndpointDlg::OnBnClickedBtnRealvideo)
 END_MESSAGE_MAP()
 
 
@@ -113,6 +121,12 @@ BOOL CbgCarEndpointDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	m_cServerIp.SetWindowText(_T("127.0.0.1"));
+	m_cServerPort.SetWindowText(_T("9876"));
+
+	CWnd *pCwnd = GetDlgItem(IDC_RADIO1);
+	CButton *b = (CButton *)pCwnd;
+	b->SetCheck(1);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -170,83 +184,529 @@ HCURSOR CbgCarEndpointDlg::OnQueryDragIcon()
 
 void CbgCarEndpointDlg::OnBnClickedBtnUp()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("Up");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRightUp()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("RightUp");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRight()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("Right");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRightDown()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("RightDown");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnDown()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("Down");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeftDown()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("LeftDown");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeft()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("Left");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeftUp()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("direction");
+	arr["value"] = Json::Value("LeftUp");
+	arr["speed"] = Json::Value("5");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnShotPlus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("camera");
+	arr["value"] = Json::Value("Plus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnShotMinus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("camera");
+	arr["value"] = Json::Value("Minus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnFocalDistansPlus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("focus");
+	arr["value"] = Json::Value("Plus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnFocalDistanceMinus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("focus");
+	arr["value"] = Json::Value("Minus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnAperyurePlus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("aperture");
+	arr["value"] = Json::Value("Plus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnAperyureMinus()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("PTZControl");
+	arr["subcmd"] = Json::Value("aperture");
+	arr["value"] = Json::Value("Minus");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
+
+void CbgCarEndpointDlg::OnBnClickedBtnRealvideo()
+{
+	// 生成一个GUID
+	char buffer[128] = {0};  
+	GUID guid;  
+
+	if (CoCreateGuid(&guid))  
+	{  
+		fprintf(stderr, "create guid error\n");  
+		return ;  
+	}  
+	_snprintf(buffer, sizeof(buffer),  
+		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
+		guid.Data1, guid.Data2, guid.Data3,  
+		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
+		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
+		guid.Data4[6], guid.Data4[7]);  
+
+	// 这里构建json控制命令
+	Json::Value arr;
+	arr["id"] = Json::Value((char*)buffer);
+	arr["commandtype"] = Json::Value("stream");
+	arr["subcmd"] = Json::Value("realvideo");
+
+	Json::StyledWriter sw;
+	std::string data = sw.write(arr);
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
+}
+
+
+
+void CbgCarEndpointDlg::OnBnClickedBtnConnect()
+{
+	CString ip;
+	CString port;
+	bool use_https = false;
+
+	m_cServerIp.GetWindowText(ip);
+	m_cServerPort.GetWindowText(port);
+
+	CWnd *pCwnd = GetDlgItem(IDC_RADIO1);
+	CButton *b = (CButton *)pCwnd;
+	if (b->GetCheck() == 1)
+		use_https = false;
+	else
+		use_https = true;
+
+	USES_CONVERSION;
+	int errCode = http_client_->OnInit(T2A(ip.GetBuffer(0)), _ttoi(port.GetString()));
+	if (errCode != 0)
+	{
+		AfxMessageBox(_T("登录失败！"));
+		return ;
+	}
+}
+
+

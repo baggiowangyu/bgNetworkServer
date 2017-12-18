@@ -58,27 +58,44 @@ int CALLBACK bgHttpServerImp::SIN_ServerNameCallback(LPCTSTR lpszServerName)
 int bgHttpServerImp::OnInit(const char *config_ini)
 {
 	int errCode = 0;
+	USES_CONVERSION;
 
 	// 前期准备工作，读取配置文件
-	
+	int plugins_count = GetPrivateProfileInt(_T("SERVER_INFO"), _T("PLUGINS"), 1, A2T(config_ini));
+	use_http_service_ = GetPrivateProfileInt(_T("SERVER_INFO"), _T("USE_HTTP"), 1, A2T(config_ini));
+	use_https_service_ = GetPrivateProfileInt(_T("SERVER_INFO"), _T("USE_HTTPS"), 0, A2T(config_ini));
 
 	// 创建HTTP服务监听器对象
 	http_server_listener_ = ::Create_HP_HttpServerListener();
 
 	// 创建HTTP服务器对象
-	http_server_ = ::Create_HP_HttpServer(http_server_listener_);
-	
-#ifdef USE_HTTPS
-	// 初始化SSL环境参数，测试版里面暂时把各种证书、密钥等信息写死
-	https_server_ = ::Create_HP_HttpsServer(http_server_listener_);
-	BOOL bret = ::HP_SSLServer_SetupSSLContext(https_server_, SSL_VM_NONE, SRV_CERT, SRV_PRI, SRV_PIN, CA_CERT, SIN_ServerNameCallback);
-	if (!bret)
-		return -1;
+	if (use_http_service_)
+	{
+		// 读取对应的HTTP配置
+		GetPrivateProfileString(_T("HTTP_SERVICE"), _T("IP"), _T("0.0.0.0"), http_server_ip_, 4096, A2T(config_ini));
+		http_port_ = (USHORT)GetPrivateProfileInt(_T("HTTP_SERVICE"), _T("IP"), 80, A2T(config_ini));
 
-	SPECIAL_SERVER_INDEX = ::HP_SSLServer_AddSSLContext(https_server_, SSL_VM_NONE, SRV_CERT_2, SRV_PRI_2, SRV_PIN_2, CA_CERT_2);
-	if (SPECIAL_SERVER_INDEX <= 0)
-		return -2;
-#endif
+		http_server_ = ::Create_HP_HttpServer(http_server_listener_);
+	}
+	
+
+	if (use_https_service_)
+	{
+		// 读取对应的HTTPS配置
+		GetPrivateProfileString(_T("HTTPS_SERVICE"), _T("IP"), _T("0.0.0.0"), https_server_ip_, 4096, A2T(config_ini));
+		https_port_ = (USHORT)GetPrivateProfileInt(_T("HTTPS_SERVICE"), _T("IP"), 8443, A2T(config_ini));
+
+		// 初始化SSL环境参数，测试版里面暂时把各种证书、密钥等信息写死
+		https_server_ = ::Create_HP_HttpsServer(http_server_listener_);
+		BOOL bret = ::HP_SSLServer_SetupSSLContext(https_server_, SSL_VM_NONE, SRV_CERT, SRV_PRI, SRV_PIN, CA_CERT, SIN_ServerNameCallback);
+		if (!bret)
+			return -1;
+
+		SPECIAL_SERVER_INDEX = ::HP_SSLServer_AddSSLContext(https_server_, SSL_VM_NONE, SRV_CERT_2, SRV_PRI_2, SRV_PIN_2, CA_CERT_2);
+		if (SPECIAL_SERVER_INDEX <= 0)
+			return -2;
+	}
+	
 
 	// 设置HTTP监听器回调函数
 	::HP_Set_FN_HttpServer_OnPrepareListen(http_server_listener_, OnPrepareListen);
@@ -109,7 +126,24 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 	// 加载业务插件
 	//
 	//////////////////////////////////////////////////////////////////////////
-	
+	for (int index = 0; index < plugins_count; ++index)
+	{
+		// 读取对应的
+		TCHAR app_name[4096] = {0};
+		_stprintf_s(app_name, _T("%s_%d"), _T("PLUGINS_"), index);
+
+		TCHAR plugin_name[4096] = {0};
+		TCHAR plugin_dll[4096] = {0};
+
+		GetPrivateProfileString(app_name, _T("NAME"), _T("DH_DeviceControl"), plugin_name, 4096, A2T(config_ini));
+		GetPrivateProfileString(app_name, _T("BINARY"), _T("bgDeviceControl.dll"), plugin_dll, 4096, A2T(config_ini));
+
+		errCode = plugin_management_.InstallPlugin(T2A(plugin_name), T2A(plugin_dll));
+		if (errCode)
+		{
+			std::cout<<"Install Plugin : "<<T2A(plugin_name)<<" failed..."<<std::endl;
+		}
+	}
 
 	return errCode;
 }
@@ -117,49 +151,57 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 int bgHttpServerImp::OnStart(const TCHAR *server_ip /*= _T("0.0.0.0")*/, USHORT http_port /*= 80*/, USHORT https_port /*= 8443*/)
 {
 	int errCode = 0;
+	BOOL bret = FALSE;
 
 	// 启动服务
-	BOOL bret = ::HP_Server_Start(http_server_, server_ip, http_port);
-	if (!bret)
+	if (use_http_service_)
 	{
-		// 错误描述
-		USES_CONVERSION;
-		LPCTSTR errstr = ::HP_Server_GetLastErrorDesc(http_server_);
-		errCode = ::HP_Server_GetLastError(http_server_);
-		std::cout<<"Start HTTP Server failed. "<<T2A(errstr)<<". errcode : "<<errCode<<std::endl;
-		return errCode;
+		bret = ::HP_Server_Start(http_server_, server_ip, http_port);
+		if (!bret)
+		{
+			// 错误描述
+			USES_CONVERSION;
+			LPCTSTR errstr = ::HP_Server_GetLastErrorDesc(http_server_);
+			errCode = ::HP_Server_GetLastError(http_server_);
+			std::cout<<"Start HTTP Server failed. "<<T2A(errstr)<<". errcode : "<<errCode<<std::endl;
+			return errCode;
+		}
 	}
 
-#ifdef USE_HTTPS
-	bret = ::HP_Server_Start(https_server_, server_ip, https_port);
-	if (!bret)
+	if (use_https_service_)
 	{
-		// 错误描述
-		::HP_Server_GetLastErrorDesc(https_server_);
-		errCode = ::HP_Server_GetLastError(https_server_);
+		bret = ::HP_Server_Start(https_server_, server_ip, https_port);
+		if (!bret)
+		{
+			// 错误描述
+			::HP_Server_GetLastErrorDesc(https_server_);
+			errCode = ::HP_Server_GetLastError(https_server_);
 
-		::HP_Server_Stop(http_server_);
+			::HP_Server_Stop(http_server_);
+		}
 	}
-#endif
+	
 
 	return errCode;
 }
 
 void bgHttpServerImp::OnDestroy()
 {
-#ifdef USE_HTTPS
-	::HP_Server_Stop(https_server_);
-#endif
-	::HP_Server_Stop(http_server_);
+	if (use_https_service_)
+	{
+		::HP_Server_Stop(https_server_);
+		// 清理 SSL 运行环境（可选，删除 m_HttpsServer 时会自动清理）
+		::HP_SSLServer_CleanupSSLContext(https_server_);
+		::Destroy_HP_HttpsServer(https_server_);
 
-	// 清理 SSL 运行环境（可选，删除 m_HttpsServer 时会自动清理）
-	::HP_SSLServer_CleanupSSLContext(http_server_);
+	}
 
-	// 销毁 HTTP 对象
-	::Destroy_HP_HttpServer(http_server_);
-#ifdef USE_HTTPS
-	::Destroy_HP_HttpsServer(https_server_);
-#endif
+	if (use_http_service_)
+	{
+		// 销毁 HTTP 对象
+		::HP_Server_Stop(http_server_);
+		::Destroy_HP_HttpServer(http_server_);
+	}
 
 	// 销毁监听器对象
 	::Destroy_HP_HttpServerListener(http_server_listener_);
@@ -335,7 +377,20 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 		if (plugin->IsMyMsg(dwConnID, method, path))
 		{
 			// 处理请求
-			plugin->HandleRequest(dwConnID, method, path, query);
+			unsigned char *response_data = nullptr;
+			int response_len = 0;
+			int errCode = plugin->HandleRequest(dwConnID, method, path, &response_data, &response_len, query);
+			if (errCode == 0)
+			{
+				// 处理成功，拿到返回值就返回应答
+				// 实际上还应该处理cookie和session相关的内容的，这个版本就算了
+				::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_OK, "GoldMsg Http Server OK", nullptr, 0, response_data, response_len);
+
+				if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
+					::HP_HttpServer_Release(pSender, dwConnID);
+			}
+
+			break;
 		}
 	} while ((plugin = plugin_management_.GetFirstPlugin()) != nullptr);
 

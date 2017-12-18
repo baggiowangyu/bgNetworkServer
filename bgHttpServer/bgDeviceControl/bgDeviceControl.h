@@ -41,7 +41,7 @@ public:
 	/**
 	 * 处理请求数据
 	 */
-	virtual int HandleRequest(unsigned long connect_id, const char *method, const char *path, const char *query = nullptr);
+	virtual int HandleRequest(unsigned long connect_id, const char *method, const char *path, unsigned char **response_data, int *response_len, const char *query = nullptr);
 
 public:
 	std::string cache_file_path_;

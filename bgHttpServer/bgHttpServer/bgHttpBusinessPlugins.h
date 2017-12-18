@@ -37,7 +37,7 @@ public:
 	/**
 	 * 处理请求数据
 	 */
-	virtual int HandleRequest(unsigned long connect_id, const char *method, const char *path, const char *query = nullptr) = 0;
+	virtual int HandleRequest(unsigned long connect_id, const char *method, const char *path, unsigned char **response_data, int *response_len, const char *query = nullptr) = 0;
 };
 
 #endif//_BG_HTTP_BUSINESS_PLUGINS_H_

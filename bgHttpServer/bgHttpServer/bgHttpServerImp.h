@@ -52,10 +52,14 @@ public:
 
 	HP_HttpServerListener http_server_listener_;
 
-//public:
-//	TCHAR server_ip_[4096];
-//	USHORT http_port_;
-//	USHORT https_port_;
+public:
+	int use_http_service_;
+	TCHAR http_server_ip_[4096];
+	USHORT http_port_;
+
+	int use_https_service_;
+	TCHAR https_server_ip_[4096];
+	USHORT https_port_;
 };
 
 #endif//_BG_HTTP_SERVER_IMP_H_
