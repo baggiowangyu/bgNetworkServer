@@ -370,6 +370,11 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
 	LPCSTR query = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY);
 
+	int errCode = 0;
+	unsigned char *response_data = nullptr;
+	int response_len = 0;
+	bool is_handled = false;
+
 	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
 
 	do 
@@ -377,22 +382,43 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 		if (plugin->IsMyMsg(dwConnID, method, path))
 		{
 			// 处理请求
-			unsigned char *response_data = nullptr;
-			int response_len = 0;
-			int errCode = plugin->HandleRequest(dwConnID, method, path, &response_data, &response_len, query);
-			if (errCode == 0)
-			{
-				// 处理成功，拿到返回值就返回应答
-				// 实际上还应该处理cookie和session相关的内容的，这个版本就算了
-				::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_OK, "GoldMsg Http Server OK", nullptr, 0, response_data, response_len);
-
-				if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
-					::HP_HttpServer_Release(pSender, dwConnID);
-			}
-
+			errCode = plugin->HandleRequest(dwConnID, method, path, &response_data, &response_len, query);
+			is_handled = true;
 			break;
 		}
 	} while ((plugin = plugin_management_.GetFirstPlugin()) != nullptr);
+
+	if (!is_handled)
+	{
+		::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_SERVICE_UNAVAILABLE, "GoldMsg Http Server", nullptr, 0, nullptr, 0);
+		// 说明没有业务插件能处理这个请求，直接释放掉连接
+		::HP_HttpServer_Release(pSender, dwConnID);
+	}
+	else
+	{
+		if (errCode == 0)
+		{
+			// 处理成功，这里组织成功的应答数据
+		}
+		else
+		{
+			// 处理失败，这里组织失败的应答数据
+		}
+
+		// 处理成功，拿到返回值就返回应答
+		// 实际上还应该处理cookie和session相关的内容的，这个版本就算了
+		BOOL bret = ::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_OK, "GoldMsg Http Server OK", nullptr, 0, response_data, response_len);
+		if (!bret)
+		{
+			En_HP_SocketError err = ::HP_Server_GetLastError(pSender);
+			LPCTSTR errstr = ::HP_GetSocketErrorDesc(err);
+			std::cout<<"SendResponse failed... "<<errstr<<" errCode : "<<err<<std::endl;
+		}
+
+		// 如果没有保持连接的头参数，那么我们就释放掉连接
+		if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
+			::HP_HttpServer_Release(pSender, dwConnID);
+	}
 
 	return HPR_OK;
 }

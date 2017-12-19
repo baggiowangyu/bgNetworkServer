@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "bgDeviceControl.h"
 
-#define CURRENT_MODULE_PATH "/goldmsg/DeviceControl"
+#define CURRENT_MODULE_PATH "/goldmsg/car/DeviceControl"
 
 bgDeviceControl::bgDeviceControl()
 	: cache_content_file_(nullptr)
