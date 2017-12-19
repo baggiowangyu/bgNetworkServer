@@ -56,6 +56,7 @@ public:
 
 private:
 	bgHttpClientImp *http_client_;
+
 public:
 	afx_msg void OnBnClickedBtnRealvideo();
 };

@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 
 #include "bgHttpClientImp.h"
+
 #include "json/json.h"
 
 #ifdef _DEBUG
@@ -54,6 +55,7 @@ END_MESSAGE_MAP()
 CbgCarEndpointDlg::CbgCarEndpointDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CbgCarEndpointDlg::IDD, pParent)
 	, http_client_(new bgHttpClientImp())
+	
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
