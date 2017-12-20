@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 
 #include "bgHttpClientImp.h"
+#include "bgCommand.h"
 
 #include "json/json.h"
 
@@ -88,6 +89,7 @@ BEGIN_MESSAGE_MAP(CbgCarEndpointDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_APERYURE_MINUS, &CbgCarEndpointDlg::OnBnClickedBtnAperyureMinus)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CbgCarEndpointDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_REALVIDEO, &CbgCarEndpointDlg::OnBnClickedBtnRealvideo)
+	ON_BN_CLICKED(IDC_BTN_REALVIDEO_STOP, &CbgCarEndpointDlg::OnBnClickedBtnRealvideoStop)
 END_MESSAGE_MAP()
 
 
@@ -182,506 +184,257 @@ HCURSOR CbgCarEndpointDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+BOOL CbgCarEndpointDlg::PreTranslateMessage(MSG* pMsg)
+{
+	std::string request_data = "";
+	if(pMsg->message == WM_LBUTTONDOWN)
+	{
+		if(pMsg->hwnd == GetDlgItem(IDC_BTN_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Up", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "UpRight", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Right", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());	
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "DownRight", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Down", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "DownLeft", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Left", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "UpLeft", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_SHOT_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("camera", "dh", "Plus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_SHOT_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("camera", "dh", "Minus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_FOCAL_DISTANS_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("focus", "dh", "Plus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_FOCAL_DISTANCE_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("focus", "dh", "Minus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_APERYURE_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("aperture", "dh", "Plus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_APERYURE_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("aperture", "dh", "Minus", "Start", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_REALVIDEO)->m_hWnd)
+		{
+			
+		}
+	}
+	else if(pMsg->message == WM_LBUTTONUP)
+	{
+		if(pMsg->hwnd == GetDlgItem(IDC_BTN_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Up", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "UpRight", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Right", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());	
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_RIGHT_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "DownRight", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Down", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT_DOWN)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "DownLeft", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "Left", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_LEFT_UP)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("direction", "dh", "UpLeft", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_SHOT_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("camera", "dh", "Plus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_SHOT_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("camera", "dh", "Minus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_FOCAL_DISTANS_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("focus", "dh", "Plus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_FOCAL_DISTANCE_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("focus", "dh", "Minus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_APERYURE_PLUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("aperture", "dh", "Plus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_APERYURE_MINUS)->m_hWnd)
+		{
+			request_data = bgCommand::GeneratePTZCommand("aperture", "dh", "Minus", "Stop", 7);
+			http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+		}
+		else if(pMsg->hwnd == GetDlgItem(IDC_BTN_REALVIDEO)->m_hWnd)
+		{
+
+		}
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnUp()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("Up");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRightUp()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("RightUp");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRight()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("Right");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnRightDown()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("RightDown");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnDown()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("Down");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeftDown()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("LeftDown");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeft()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("Left");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
-
 
 void CbgCarEndpointDlg::OnBnClickedBtnLeftUp()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("direction");
-	arr["value"] = Json::Value("LeftUp");
-	arr["speed"] = Json::Value("5");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnShotPlus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("camera");
-	arr["value"] = Json::Value("Plus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnShotMinus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("camera");
-	arr["value"] = Json::Value("Minus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnFocalDistansPlus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("focus");
-	arr["value"] = Json::Value("Plus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnFocalDistanceMinus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("focus");
-	arr["value"] = Json::Value("Minus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnAperyurePlus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("aperture");
-	arr["value"] = Json::Value("Plus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 
 void CbgCarEndpointDlg::OnBnClickedBtnAperyureMinus()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
 
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("PTZControl");
-	arr["subcmd"] = Json::Value("aperture");
-	arr["value"] = Json::Value("Minus");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
-
-	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
 }
 
 void CbgCarEndpointDlg::OnBnClickedBtnRealvideo()
 {
-	// 生成一个GUID
-	char buffer[128] = {0};  
-	GUID guid;  
-
-	if (CoCreateGuid(&guid))  
-	{  
-		fprintf(stderr, "create guid error\n");  
-		return ;  
-	}  
-	_snprintf(buffer, sizeof(buffer),  
-		"%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",  
-		guid.Data1, guid.Data2, guid.Data3,  
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],  
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],  
-		guid.Data4[6], guid.Data4[7]);  
-
-	// 这里构建json控制命令
-	Json::Value arr;
-	arr["id"] = Json::Value((char*)buffer);
-	arr["commandtype"] = Json::Value("stream");
-	arr["subcmd"] = Json::Value("realvideo");
-
-	Json::StyledWriter sw;
-	std::string data = sw.write(arr);
+	std::string request_data = bgCommand::GenerateStreamCommand("realvideo", "dh", "", "Start");
 
 	// 发送HTTP请求
-	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)data.c_str(), data.size());
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
 }
 
 
@@ -712,3 +465,12 @@ void CbgCarEndpointDlg::OnBnClickedBtnConnect()
 }
 
 
+
+
+void CbgCarEndpointDlg::OnBnClickedBtnRealvideoStop()
+{
+	std::string request_data = bgCommand::GenerateStreamCommand("realvideo", "dh", "", "Stop");
+
+	// 发送HTTP请求
+	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());
+}

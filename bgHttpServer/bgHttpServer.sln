@@ -2,10 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bgHttpServer", "bgHttpServer\bgHttpServer.vcxproj", "{9F987AD0-6645-469E-87A6-41BEBC2035CF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60} = {F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "业务插件", "业务插件", "{67773A47-3205-41F2-BFE9-CAD2CFBFF5C0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bgDeviceControl", "bgDeviceControl\bgDeviceControl.vcxproj", "{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BD0BA141-98C2-4802-9122-B66CC5D2B0C9} = {BD0BA141-98C2-4802-9122-B66CC5D2B0C9}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "车载客户端", "车载客户端", "{8C335597-9DE1-4199-A185-0F95D871C15A}"
 EndProject

@@ -31,6 +31,7 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg BOOL PreTranslateMessage(MSG* pMsg);
 	DECLARE_MESSAGE_MAP()
 public:
 	CListBox m_cControlInfo;
@@ -59,4 +60,5 @@ private:
 
 public:
 	afx_msg void OnBnClickedBtnRealvideo();
+	afx_msg void OnBnClickedBtnRealvideoStop();
 };

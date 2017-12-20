@@ -135,10 +135,10 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		TCHAR plugin_name[4096] = {0};
 		TCHAR plugin_dll[4096] = {0};
 
-		GetPrivateProfileString(app_name, _T("NAME"), _T("DH_DeviceControl"), plugin_name, 4096, A2T(config_ini));
+		GetPrivateProfileString(app_name, _T("NAME"), _T("DeviceControl"), plugin_name, 4096, A2T(config_ini));
 		GetPrivateProfileString(app_name, _T("BINARY"), _T("bgDeviceControl.dll"), plugin_dll, 4096, A2T(config_ini));
 
-		errCode = plugin_management_.InstallPlugin(T2A(plugin_name), T2A(plugin_dll));
+		errCode = plugin_management_.InstallPlugin(T2A(plugin_name), T2A(plugin_dll), config_ini);
 		if (errCode)
 		{
 			std::cout<<"Install Plugin : "<<T2A(plugin_name)<<" failed..."<<std::endl;
@@ -286,13 +286,18 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer
 	LPCSTR method = ::HP_HttpServer_GetMethod(pSender, dwConnID);
 	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
 	LPCSTR query = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY);
+	ULONGLONG content_len = ::HP_HttpServer_GetContentLength(pSender, dwConnID);
 
 	// 遍历所有业务插件，将消息分发进去
 	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
 
 	do 
 	{
-		plugin->IsMyMsg(dwConnID, method, path);
+		if (plugin->IsMyMsg(dwConnID, method, path))
+		{
+			plugin->SetHttpContentLength(dwConnID, content_len);
+			break;
+		}
 
 	} while ((plugin = plugin_management_.GetNextPlugin()) != nullptr);
 
@@ -303,15 +308,28 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnBody(HP_HttpServer pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	// 这里4096字节截断，所以各个组件需要整理头部数据以及缓存实体数据
-	std::cout<<"bgHttpServerImp::OnBody Start====================="<<std::endl;
 	std::cout<<"bgHttpServerImp::OnBody connect_id : "<<dwConnID<<std::endl;
 
-	std::cout<<"data_len : "<<iLength<<std::endl;
-	char *buffer = new char[iLength + 1];
-	memcpy(buffer, pData, iLength);
-	buffer[iLength] = '\0';
-	std::cout<<"data : "<<buffer<<std::endl;
-	std::cout<<"bgHttpServerImp::OnBody Finished====================="<<std::endl;
+	LPCSTR method = ::HP_HttpServer_GetMethod(pSender, dwConnID);
+	LPCSTR path = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH);
+	LPCSTR query = ::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY);
+
+	// 遍历所有业务插件，将消息分发进去
+	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
+
+	do 
+	{
+		if (plugin->IsMyMsg(dwConnID, method, path))
+		{
+			int errCode = plugin->CacheHttpContentData(dwConnID, pData, iLength);
+			if (errCode != 0)
+				std::cout<<"bgHttpServerImp::OnBody cache body data failed. errCode : "<<errCode<<std::endl;
+
+			break;
+		}
+
+	} while ((plugin = plugin_management_.GetNextPlugin()) != nullptr);
+
 	return HPR_OK;
 }
 
@@ -329,40 +347,24 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnChunkComplete(HP_HttpServer p
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
 {
+	std::cout<<"bgHttpServerImp::OnMessageComplete connect_id : "<<dwConnID<<std::endl;
 	// 消息接收完成，取出调用的Object，分发到所有的处理插件中
 	USES_CONVERSION;
-	std::cout<<"bgHttpServerImp::OnMessageComplete Start ==========="<<std::endl;
-	std::cout<<"connect_id : "<<dwConnID<<std::endl;
-	std::cout<<"client request method : "<<::HP_HttpServer_GetMethod(pSender, dwConnID)<<std::endl;
-	std::cout<<"client schema : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_SCHEMA)<<std::endl;
-	std::cout<<"client host : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_HOST)<<std::endl;
-	std::cout<<"client port : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PORT)<<std::endl;
-	std::cout<<"client path : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_PATH)<<std::endl;
-	std::cout<<"client query : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_QUERY)<<std::endl;
-	std::cout<<"client fragment : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_FRAGMENT)<<std::endl;
-	std::cout<<"client userinfo : "<<::HP_HttpServer_GetUrlField(pSender, dwConnID, HUF_USERINFO)<<std::endl;
 
-	// 展示所有的HTTP头信息
-	DWORD dwHeaderCount = 0;
-	::HP_HttpServer_GetAllHeaders(pSender, dwConnID, nullptr, &dwHeaderCount);
+	//// 展示所有的HTTP头信息
+	//DWORD dwHeaderCount = 0;
+	//::HP_HttpServer_GetAllHeaders(pSender, dwConnID, nullptr, &dwHeaderCount);
 
-	if(dwHeaderCount > 0)
-	{
-		THeader *headers = new THeader[dwHeaderCount];
-		if(::HP_HttpServer_GetAllHeaders(pSender, dwConnID, headers, &dwHeaderCount))
-		{
-			for(DWORD i = 0; i < dwHeaderCount; i++)
-				std::cout<<"client header : "<<headers[i].name<<" - "<<headers[i].value<<std::endl;
-		}
-		delete [] headers;
-	}
-
-	// 展示传递过来的数据信息
-	std::cout<<"client content_type : "<<((::HP_HttpServer_GetContentType(pSender, dwConnID) == NULL) ? "None" : (::HP_HttpServer_GetContentType(pSender, dwConnID)))<<std::endl;
-	std::cout<<"client content_length : "<<::HP_HttpServer_GetContentLength(pSender, dwConnID)<<std::endl;
-	std::cout<<"client content_encoding : "<<((::HP_HttpServer_GetContentEncoding(pSender, dwConnID) == NULL) ? "None" : (::HP_HttpServer_GetContentEncoding(pSender, dwConnID)))<<std::endl;
-
-	std::cout<<"bgHttpServerImp::OnMessageComplete Finish ==========="<<std::endl;
+	//if(dwHeaderCount > 0)
+	//{
+	//	THeader *headers = new THeader[dwHeaderCount];
+	//	if(::HP_HttpServer_GetAllHeaders(pSender, dwConnID, headers, &dwHeaderCount))
+	//	{
+	//		for(DWORD i = 0; i < dwHeaderCount; i++)
+	//			std::cout<<"client header : "<<headers[i].name<<" - "<<headers[i].value<<std::endl;
+	//	}
+	//	delete [] headers;
+	//}
 
 	// 我们直接在这里处理相关业务
 	// 至于POST的数据，应该要与ConnectID挂钩
@@ -381,9 +383,31 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	{
 		if (plugin->IsMyMsg(dwConnID, method, path))
 		{
+HANDLE_REQUEST:
 			// 处理请求
 			errCode = plugin->HandleRequest(dwConnID, method, path, &response_data, &response_len, query);
 			is_handled = true;
+
+			// 处理成功，拿到返回值就返回应答
+			// 实际上还应该处理cookie和session相关的内容的，这个版本就算了
+			BOOL bret = ::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_OK, "GoldMsg Http Server OK", nullptr, 0, response_data, response_len);
+			if (!bret)
+			{
+				En_HP_SocketError err = ::HP_Server_GetLastError(pSender);
+				LPCTSTR errstr = ::HP_GetSocketErrorDesc(err);
+				std::cout<<"SendResponse failed... "<<errstr<<" errCode : "<<err<<std::endl;
+			}
+
+			// 清理应答数据
+			plugin->CleanupResponseData(dwConnID, method, &response_data);
+
+			if (errCode == 1)
+				goto HANDLE_REQUEST;
+
+			// 如果没有保持连接的头参数，那么我们就释放掉连接
+			if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
+				::HP_HttpServer_Release(pSender, dwConnID);
+
 			break;
 		}
 	} while ((plugin = plugin_management_.GetFirstPlugin()) != nullptr);
@@ -396,28 +420,7 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	}
 	else
 	{
-		if (errCode == 0)
-		{
-			// 处理成功，这里组织成功的应答数据
-		}
-		else
-		{
-			// 处理失败，这里组织失败的应答数据
-		}
-
-		// 处理成功，拿到返回值就返回应答
-		// 实际上还应该处理cookie和session相关的内容的，这个版本就算了
-		BOOL bret = ::HP_HttpServer_SendResponse(pSender, dwConnID, HSC_OK, "GoldMsg Http Server OK", nullptr, 0, response_data, response_len);
-		if (!bret)
-		{
-			En_HP_SocketError err = ::HP_Server_GetLastError(pSender);
-			LPCTSTR errstr = ::HP_GetSocketErrorDesc(err);
-			std::cout<<"SendResponse failed... "<<errstr<<" errCode : "<<err<<std::endl;
-		}
-
-		// 如果没有保持连接的头参数，那么我们就释放掉连接
-		if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
-			::HP_HttpServer_Release(pSender, dwConnID);
+		
 	}
 
 	return HPR_OK;

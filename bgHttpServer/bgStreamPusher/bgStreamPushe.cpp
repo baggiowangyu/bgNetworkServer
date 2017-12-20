@@ -54,5 +54,15 @@ int bgStreamPusher::StartPush(const char *push_url)
 	//
 	//////////////////////////////////////////////////////////////////////////
 
+	AVCodec *output_video_codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+	if (!output_video_codec)
+		return -1;
+
+	AVStream *output_video_stream = avformat_new_stream(output_format_context, output_video_codec);
+	if (!output_video_stream)
+		return -2;
+
+	//AVCodecContext
+
 	return errCode;
 }

@@ -3,74 +3,93 @@
 
 #include "stdafx.h"
 #include "bgDeviceControl.h"
+#include "bgDaHuaDeviceControl.h"
+#include "json/json.h"
 
-#define CURRENT_MODULE_PATH "/goldmsg/car/DeviceControl"
+#define COMMAND_PATH		"/goldmsg/car/DeviceControl"
+#define STREAM_PATH			"/goldmsg/car/Live.flv"
+
+#define MAX_CMD_LEN				4096
 
 bgDeviceControl::bgDeviceControl()
-	: cache_content_file_(nullptr)
+	: dahua_device_(new bgDahuaDeviceControl())
 {
 
 }
 
 bgDeviceControl::~bgDeviceControl()
 {
-
+	delete dahua_device_;
+	dahua_device_ = nullptr;
 }
 
 int bgDeviceControl::Init(const char *config_ini)
 {
 	int errCode = 0;
 
+	// 为每一个设备调用初始化接口
+	errCode = dahua_device_->OnInit(config_ini);
+
 	return errCode;
 }
 
 bool bgDeviceControl::IsMyMsg(unsigned long connect_id, const char *method, const char *path)
 {
-	if (_stricmp(path, CURRENT_MODULE_PATH) != 0)
-		return false;
-	else
+	// 首先判断提交的路径是否是本模块关注的路径
+	// 然后判断本模块接受的方法，目前设定接受GET和POST
+	if (_stricmp(method, "GET") == 0)
 	{
-		if (_stricmp(method, "GET") == 0)
-			return true;
-		else if (_stricmp(method, "POST") == 0)
-		{
-			// 生成一个用文件名，用于写
-			return true;
-		}
-		else
-		{
+		// GET操作可以用于获取媒体流
+		if (_stricmp(path, STREAM_PATH) != 0)
 			return false;
-		}
+		else
+			return true;
 	}
-		
+	else if (_stricmp(method, "POST") == 0)
+	{
+		// 判断是不是信令处理的路径
+		if (_stricmp(path, COMMAND_PATH) != 0)
+			return false;
+		else
+			return true;
+	}
+	else
+		return false;
 }
 
-int bgDeviceControl::SetHttpContentLength(int data_len)
+int bgDeviceControl::SetHttpContentLength(unsigned long connect_id, unsigned long long data_len)
 {
 	int errCode = 0;
 
-	// 每次进这个函数，说明当前有新的操作进来了，创建一个临时文件
-	SYSTEMTIME st;
-	GetLocalTime(&st);
+	// 本模块默认支持的最大命令字节数为4k
+	if (data_len > MAX_CMD_LEN)
+		return ERROR_BUFFER_OVERFLOW;
 
-	char tmp_path[4096] = {0};
-	GetTempFileNameA("BG_", "TEMP_", 4096, tmp_path);
+	// 构建命令缓冲，准备接收数据
+	COMMAND_DATA cmddata;
+	cmddata.cmddata_size_ = 0;
+	cmddata.cmddata_buffer_len_ = data_len + 1;
+	cmddata.cmddata_ = new unsigned char[cmddata.cmddata_buffer_len_];
+	memset(cmddata.cmddata_, 0, cmddata.cmddata_buffer_len_);
 
-	cache_file_path_ = tmp_path;
-
-	cache_content_file_ = fopen(tmp_path, "rwb");
-	if (cache_content_file_ == nullptr)
-		return -1;
+	cmds_.insert(std::pair<unsigned long, COMMAND_DATA>(connect_id, cmddata));
 
 	return errCode;
 }
 
-int bgDeviceControl::CacheHttpContentData(const unsigned char *data, int data_len)
+int bgDeviceControl::CacheHttpContentData(unsigned long connect_id, const unsigned char *data, int data_len)
 {
 	int errCode = 0;
 
-	if (cache_content_file_)
-		fwrite(data, 1, data_len, cache_content_file_);
+	// 找缓冲
+	std::map<unsigned long, COMMAND_DATA>::iterator iter = cmds_.find(connect_id);
+	if (iter == cmds_.end())
+		return ERROR_NOT_FOUND;
+
+	// 缓冲数据
+	COMMAND_DATA cmddata = iter->second;
+	memcpy(cmddata.cmddata_ + cmddata.cmddata_size_, data, data_len);
+	cmddata.cmddata_size_ += data_len;
 
 	return errCode;
 }
@@ -85,9 +104,11 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			errCode = ERROR_NOT_SUPPORTED;
 		else
 		{
-
+			// 根据查询条件读取
+			// 这里简单粗暴一点吧，直接传数据
+			dahua_device_->ReadCacheRealStreamData(response_data, response_len);
+			errCode = 1;
 		}
-
 	}
 	else if (_stricmp("POST", method) == 0)
 	{
@@ -95,17 +116,111 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			errCode = ERROR_NOT_SUPPORTED;
 		else
 		{
+			// 找到缓冲
+			std::map<unsigned long, COMMAND_DATA>::iterator iter = cmds_.find(connect_id);
+			if (iter == cmds_.end())
+				return ERROR_NOT_FOUND;
 
+			COMMAND_DATA cmddata = iter->second;
+			std::string request_data = (const char *)cmddata.cmddata_;
+
+			// 输出缓冲
+			std::cout<<"Start handle request : "<<std::endl;
+			std::cout<<request_data.c_str()<<std::endl;
+
+			// 将请求数据转换为json对象进行处理
+			Json::Reader reader;
+			Json::Value json_root;
+
+			if (!reader.parse(request_data, json_root))
+				errCode = ERROR_BAD_COMMAND;
+			else
+			{
+				if (json_root["commandtype"].asString().compare("PTZControl") == 0)
+				{
+					// 这是云台控制指令
+					std::string subcmd = json_root["subcmd"].asString();
+					std::string manufacturer = json_root["manufacturer"].asString();
+					std::string cmdval = json_root["value"].asString();
+					std::string cmdstate = json_root["state"].asString();
+					int speed = json_root["speed"].asInt();
+
+					// 发送控制指令到设备
+					if (manufacturer.compare("dh") == 0)
+						errCode = dahua_device_->OnPTZControl(subcmd.c_str(), cmdval.c_str(), 0, speed, 0, cmdstate.compare("Stop") == 0 ? TRUE : FALSE);
+					else
+						errCode = ERROR_NOT_SUPPORTED;
+				}
+				else if (json_root["commandtype"].asString().compare("stream") == 0)
+				{
+					// 这是点流指令，向设备发送点流请求
+					std::string subcmd = json_root["subcmd"].asString();
+					std::string manufacturer = json_root["manufacturer"].asString();
+					std::string cmdstate = json_root["state"].asString();
+
+					if (_stricmp(cmdstate.c_str(), "Start") == 0)
+					{
+						if (manufacturer.compare("dh") == 0)
+							errCode = dahua_device_->OnStartRealPlay();
+					}
+					else
+					{
+						if (manufacturer.compare("dh") == 0)
+							errCode = dahua_device_->OnStopRealPlay();
+					}
+				}
+
+				// 处理返回结果
+				Json::Value result;
+				result["id"] = Json::Value(json_root["id"].asString());
+
+				if (errCode == 0)
+					result["status"] = Json::Value("OK");
+				else
+					result["status"] = Json::Value("FAIL");
+
+				Json::StyledWriter sw;
+				std::string result_data = sw.write(result);
+
+				std::cout<<result_data.c_str()<<std::endl;
+
+				if (response_len)
+				{
+					*response_len = result_data.size();
+					*response_data = new unsigned char[*response_len + 1];
+					memcpy(*response_data, result_data.c_str(), result_data.size());
+				}
+			}
+
+			// 这里无论处理成功还是失败，我们都应该释放掉这个元素
+			delete [] cmddata.cmddata_;
+			cmddata.cmddata_ = nullptr;
+			cmddata.cmddata_buffer_len_ = 0;
+			cmddata.cmddata_size_ = 0;
+
+			// 这里的操作应该是需要上锁的，这里我先不上锁
+			cmds_.erase(connect_id);
 		}
 	}
 	else
-	{
 		errCode = ERROR_NOT_SUPPORTED;
-	}
 
 	// 处理完毕之后返回处理结果
 
 	return errCode;
+}
+
+void bgDeviceControl::CleanupResponseData(unsigned long connect_id, const char *method, unsigned char **response_data)
+{
+	if (_stricmp(method, "GET") == 0)
+	{
+		dahua_device_->ReleaseCacheResource(response_data);
+	}
+	else
+	{
+		delete [] *response_data;
+		*response_data = nullptr;
+	}
 }
 
 extern "C" bgHttpBusinessPlugins* __stdcall CreateObject()
@@ -113,8 +228,8 @@ extern "C" bgHttpBusinessPlugins* __stdcall CreateObject()
 	return (bgHttpBusinessPlugins*)new bgDeviceControl();
 }
 
-extern "C" void __stdcall DestroyObject(bgHttpBusinessPlugins* plugin)
+extern "C" void __stdcall DestroyObject(bgHttpBusinessPlugins** plugin)
 {
-	delete plugin;
-	plugin = NULL;
+	delete *plugin;
+	*plugin = NULL;
 }

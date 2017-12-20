@@ -7,7 +7,7 @@
 #include <Windows.h>
 
 extern "C" typedef bgHttpBusinessPlugins* (__stdcall * _CreateObject)();
-extern "C" typedef void (__stdcall * _DestroyObject)(bgHttpBusinessPlugins* plugin);
+extern "C" typedef void (__stdcall * _DestroyObject)(bgHttpBusinessPlugins** plugin);
 
 typedef struct _PLUGIN_INFO_
 {
@@ -24,7 +24,7 @@ public:
 	~bgPluginManagement();
 
 public:
-	int InstallPlugin(std::string plugin_name, std::string path);
+	int InstallPlugin(std::string plugin_name, std::string path, std::string cfg_path);
 	int RemovePlugin(std::string plugin_name);
 	void CleanupAllPlugins();
 

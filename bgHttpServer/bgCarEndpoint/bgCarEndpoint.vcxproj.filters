@@ -48,6 +48,9 @@
     <ClInclude Include="bgHttpClientImp.h">
       <Filter>HttpClient</Filter>
     </ClInclude>
+    <ClInclude Include="bgCommand.h">
+      <Filter>信令生成</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgCarEndpoint.cpp">
@@ -61,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="bgHttpClientImp.cpp">
       <Filter>HttpClient</Filter>
+    </ClCompile>
+    <ClCompile Include="bgCommand.cpp">
+      <Filter>信令生成</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

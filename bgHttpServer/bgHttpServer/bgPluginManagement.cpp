@@ -13,7 +13,7 @@ bgPluginManagement::~bgPluginManagement()
 
 }
 
-int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path)
+int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, std::string cfg_path)
 {
 	int errCode = 0;
 
@@ -51,6 +51,15 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path)
 		return errCode;
 	}
 
+	// 直接执行插件初始化，如果初始化失败，也说明插件加载失败了
+	errCode = plugin->Init(cfg_path.c_str());
+	if (errCode != 0)
+	{
+		ptr_DestroyObject(&plugin);
+		//FreeLibrary(hMod);
+		return errCode;
+	}
+
 	PLUGIN_INFO plugin_info;
 	plugin_info.plugin_object_ = plugin;
 	plugin_info.destructor_ = ptr_DestroyObject;
@@ -67,10 +76,10 @@ int bgPluginManagement::RemovePlugin(std::string plugin_name)
 
 	// 先释放掉对象
 	_DestroyObject ptr_DestroyObject = iter->second.destructor_;
-	ptr_DestroyObject(iter->second.plugin_object_);
+	ptr_DestroyObject(&iter->second.plugin_object_);
 
 	// 释放库
-	FreeLibrary(iter->second.module_handle_);
+	//FreeLibrary(iter->second.module_handle_);
 
 	// 删除元素
 	plugins_.erase(plugin_name);

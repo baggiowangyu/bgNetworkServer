@@ -24,7 +24,7 @@ public:
 	/**
 	 * 设置HTTP实体数据总长度，准备好相应的
 	 */
-	virtual int SetHttpContentLength(int data_len) = 0;
+	virtual int SetHttpContentLength(unsigned long connect_id, unsigned long long data_len) = 0;
 
 	/**
 	 * 缓存HTTP实体数据
@@ -32,12 +32,20 @@ public:
 	 *	@data		实体数据
 	 *	@data_len	数据长度
 	 */ 
-	virtual int CacheHttpContentData(const unsigned char *data, int data_len) = 0;
+	virtual int CacheHttpContentData(unsigned long connect_id, const unsigned char *data, int data_len) = 0;
 
 	/**
 	 * 处理请求数据
+	 * 返回值：
+	 *	0 - 完成，返回
+	 *	1 - 完成，需要循环
 	 */
 	virtual int HandleRequest(unsigned long connect_id, const char *method, const char *path, unsigned char **response_data, int *response_len, const char *query = nullptr) = 0;
+
+	/**
+	 * 清理应答数据
+	 */
+	virtual void CleanupResponseData(unsigned long connect_id, const char *method, unsigned char **response_data) = 0;
 };
 
 #endif//_BG_HTTP_BUSINESS_PLUGINS_H_

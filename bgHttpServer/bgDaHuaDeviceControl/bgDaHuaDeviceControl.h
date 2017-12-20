@@ -1,13 +1,23 @@
 #ifndef _BG_DAHUA_DEVICE_CONTROL_H_
 #define _BG_DAHUA_DEVICE_CONTROL_H_
 
-#include "dhnetsdk.h"
+#include <windows.h>
+
 
 class bgDahuaDeviceRealStreamNotifer
 {
 public:
-	virtual void RealStreamDataNotify(DWORD dwDataType, BYTE *pBuffer, DWORD dwBufSize, LONG param, LDWORD dwUser) = 0;
+	virtual void RealStreamDataNotify(DWORD dwDataType, BYTE *pBuffer, DWORD dwBufSize, LONG param, DWORD dwUser) = 0;
 };
+
+//////////////////////////////////////////////////////////////////////////
+//
+// 大华设备控制类
+// 关于点流问题的描述：
+// 设备控制端可以记录提交点流的connect_id
+// 当它们与服务器断开连接的时候，清除对应的记录，当记录清零后，停止推流
+//
+//////////////////////////////////////////////////////////////////////////
 
 class bgDahuaDeviceControl
 {
@@ -16,6 +26,8 @@ public:
 	~bgDahuaDeviceControl();
 
 public:
+	int OnInit(const char *config_ini);
+
 	/**
 	 * 设备登录
 	 */
@@ -25,6 +37,9 @@ public:
 	 * 退出设备登录
 	 */
 	int OnLogout();
+
+public:
+	int OnPTZControl(const char *cmdtype, const char *cmd, int param1, int param2, int param3, BOOL stop = FALSE);
 
 public:
 	/**
@@ -55,27 +70,28 @@ public:
 	 */
 	int OnStartRealPlay();
 	int OnStopRealPlay();
+	bool IsRealPlay();
 
 public:
 	/**
-	 * 视频监视数据回调函数
+	 * 实时流数据缓冲与读取
 	 */
-	static void CALLBACK _fRealDataCallBackEx(LLONG lRealHandle, DWORD dwDataType, BYTE *pBuffer, DWORD dwBufSize, LONG param, LDWORD dwUser);
-
-	/**
-	 * 视频监视断开回调
-	 */
-	static void CALLBACK _fRealPlayDisConnect(LLONG lOperateHandle, EM_REALPLAY_DISCONNECT_EVENT_TYPE dwEventType, void* param, LDWORD dwUser);
+	void CacheRealStreamData(const unsigned char *data, int data_len);
+	void ReadCacheRealStreamData(unsigned char **data, int *data_len);
+	void ReleaseCacheResource(unsigned char **data);
 
 public:
 	bgDahuaDeviceRealStreamNotifer *notifer_;
 
 private:
-	NET_DEVICEINFO_Ex device_info_;
-	LLONG login_id_;
-	LLONG real_handle_;
-
+	LONG login_id_;
+	LONG real_handle_;
 	int move_speed_;
+
+private:
+	CRITICAL_SECTION cache_section_;
+	unsigned char cache_data_[40960];	// 默认数据缓冲区40K
+	int cache_data_len_;
 };
 
 #endif//_BG_DAHUA_DEVICE_CONTROL_H_
