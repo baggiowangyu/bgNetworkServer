@@ -86,9 +86,21 @@ int bgDahuaDeviceControl::OnInit(const char *config_ini)
 	port = (unsigned short)GetPrivateProfileIntA(CFG_NAME, "DEV_PORT", 37777, config_ini);
 	GetPrivateProfileStringA(CFG_NAME, "DEV_USER", "admin", username, 4096, config_ini);
 	GetPrivateProfileStringA(CFG_NAME, "DEV_PASS", "admin", password, 4096, config_ini);
+	int auto_realstream = GetPrivateProfileIntA(CFG_NAME, "AUTO_REALSTREAM", 1, config_ini);
 
 	std::cout<<"DH_DeviceControl login - ip : "<<ip<<", port : "<<port<<", user : "<<username<<", pass : "<<password<<std::endl;
-	return OnLogin(ip, port, username, password);
+	int errCode = OnLogin(ip, port, username, password);
+	if (errCode != 0)
+	{
+		return errCode;
+	}
+
+	if (auto_realstream)
+	{
+		errCode = OnStartRealPlay();
+	}
+
+	return errCode;
 }
 
 int bgDahuaDeviceControl::OnLogin(const char *device_ip, unsigned short device_port, const char *username, const char *password)

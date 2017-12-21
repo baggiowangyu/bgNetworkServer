@@ -73,7 +73,7 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 	{
 		// 读取对应的HTTP配置
 		GetPrivateProfileString(_T("HTTP_SERVICE"), _T("IP"), _T("0.0.0.0"), http_server_ip_, 4096, A2T(config_ini));
-		http_port_ = (USHORT)GetPrivateProfileInt(_T("HTTP_SERVICE"), _T("IP"), 80, A2T(config_ini));
+		http_port_ = (USHORT)GetPrivateProfileInt(_T("HTTP_SERVICE"), _T("PORT"), 80, A2T(config_ini));
 
 		http_server_ = ::Create_HP_HttpServer(http_server_listener_);
 	}
@@ -83,7 +83,7 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 	{
 		// 读取对应的HTTPS配置
 		GetPrivateProfileString(_T("HTTPS_SERVICE"), _T("IP"), _T("0.0.0.0"), https_server_ip_, 4096, A2T(config_ini));
-		https_port_ = (USHORT)GetPrivateProfileInt(_T("HTTPS_SERVICE"), _T("IP"), 8443, A2T(config_ini));
+		https_port_ = (USHORT)GetPrivateProfileInt(_T("HTTPS_SERVICE"), _T("PORT"), 8443, A2T(config_ini));
 
 		// 初始化SSL环境参数，测试版里面暂时把各种证书、密钥等信息写死
 		https_server_ = ::Create_HP_HttpsServer(http_server_listener_);
