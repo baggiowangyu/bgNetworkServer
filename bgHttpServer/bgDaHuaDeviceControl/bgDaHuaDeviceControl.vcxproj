@@ -75,9 +75,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgDaHuaDeviceControl.h" />
+    <ClInclude Include="StreamPusherManagement.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgDaHuaDeviceControl.cpp" />
+    <ClCompile Include="StreamPusherManagement.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

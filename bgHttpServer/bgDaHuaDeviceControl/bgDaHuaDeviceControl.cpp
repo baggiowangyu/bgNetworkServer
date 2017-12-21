@@ -319,11 +319,27 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 {
 	int errCode = 0;
 
-	real_handle_ = CLIENT_StartRealPlay(login_id_, 0, nullptr, DH_RType_Realplay, _fRealDataCallBackEx, _fRealPlayDisConnect, (LDWORD)this);
+	//real_handle_ = CLIENT_StartRealPlay(login_id_, 0, nullptr, DH_RType_Realplay, _fRealDataCallBackEx, _fRealPlayDisConnect, (LDWORD)this);
+	//if (real_handle_ == 0)
+	//	return -1;
+
+	real_handle_ = CLIENT_RealPlayEx(login_id_, 0, nullptr);
 	if (real_handle_ == 0)
 		return -1;
 
+	//// 安装数据读取回调，要求读出的是标准的MPEG/H264标准数据
+	//// 如果我们自己写推流器，就安装这个回调函数，这里暂时不需要
+	// BOOL bret = CLIENT_SetRealDataCallBackEx(real_handle_, _fRealDataCallBackEx, (DWORD)this, 0x0000001f);
+
 	// 成功之后，将信息送入推流器，准备推流
+	// 憋了一个超级大招，直接用ffmpeg拉流转发，由于车载端
+	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/ -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1/dh_dvr.sdp
+	// 参数：
+	// 1. ffmpeg.exe的完整路径
+	// 2. 摄像头登录账号、密码
+	// 3. 摄像头IP地址
+	// 4. 推流目标服务器地址
+
 
 	return errCode;
 }

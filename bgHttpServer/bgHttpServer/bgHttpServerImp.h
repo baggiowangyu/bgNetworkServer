@@ -43,7 +43,7 @@ public:
 
 public:
 	int OnInit(const char *config_ini);
-	int OnStart(const TCHAR *server_ip = _T("0.0.0.0"), USHORT http_port = 80, USHORT https_port = 8443);
+	int OnStart();
 	void OnDestroy();
 
 public:

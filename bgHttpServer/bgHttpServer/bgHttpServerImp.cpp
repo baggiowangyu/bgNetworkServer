@@ -148,7 +148,7 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 	return errCode;
 }
 
-int bgHttpServerImp::OnStart(const TCHAR *server_ip /*= _T("0.0.0.0")*/, USHORT http_port /*= 80*/, USHORT https_port /*= 8443*/)
+int bgHttpServerImp::OnStart()
 {
 	int errCode = 0;
 	BOOL bret = FALSE;
@@ -156,7 +156,7 @@ int bgHttpServerImp::OnStart(const TCHAR *server_ip /*= _T("0.0.0.0")*/, USHORT 
 	// ∆Ù∂Ø∑˛ŒÒ
 	if (use_http_service_)
 	{
-		bret = ::HP_Server_Start(http_server_, server_ip, http_port);
+		bret = ::HP_Server_Start(http_server_, http_server_ip_, http_port_);
 		if (!bret)
 		{
 			// ¥ÌŒÛ√Ë ˆ
@@ -170,7 +170,7 @@ int bgHttpServerImp::OnStart(const TCHAR *server_ip /*= _T("0.0.0.0")*/, USHORT 
 
 	if (use_https_service_)
 	{
-		bret = ::HP_Server_Start(https_server_, server_ip, https_port);
+		bret = ::HP_Server_Start(https_server_, https_server_ip_, https_port_);
 		if (!bret)
 		{
 			// ¥ÌŒÛ√Ë ˆ
@@ -181,7 +181,6 @@ int bgHttpServerImp::OnStart(const TCHAR *server_ip /*= _T("0.0.0.0")*/, USHORT 
 		}
 	}
 	
-
 	return errCode;
 }
 

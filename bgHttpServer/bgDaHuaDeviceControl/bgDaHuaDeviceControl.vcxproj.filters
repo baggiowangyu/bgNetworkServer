@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="推流器管理">
+      <UniqueIdentifier>{b64cc422-f98d-47a2-a4e7-40b9b99e64ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -21,10 +24,16 @@
     <ClInclude Include="bgDaHuaDeviceControl.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StreamPusherManagement.h">
+      <Filter>推流器管理</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgDaHuaDeviceControl.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamPusherManagement.cpp">
+      <Filter>推流器管理</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
