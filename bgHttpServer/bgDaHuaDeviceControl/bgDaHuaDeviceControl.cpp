@@ -1,8 +1,10 @@
 #include "bgDaHuaDeviceControl.h"
+#include "StreamPusherManagement.h"
 #include "dhnetsdk.h"
 #include <iostream>
 
 #define CFG_NAME				"DH_DEV"
+#define STREAM_SERVER_NAME		"STREAM_SERVER"
 
 #define TEST_WRITEFILE
 
@@ -66,39 +68,63 @@ bgDahuaDeviceControl::bgDahuaDeviceControl(bgDahuaDeviceRealStreamNotifer *notif
 	: notifer_(notifer)
 	, move_speed_(4)
 	, cache_data_len_(0)
+	, stream_pusher_management_(new StreamPusherManagement())
 {
 	CLIENT_Init(NULL, 0);
 }
 
 bgDahuaDeviceControl::~bgDahuaDeviceControl()
 {
+	delete stream_pusher_management_;
 	CLIENT_Cleanup();
 }
 
 int bgDahuaDeviceControl::OnInit(const char *config_ini)
 {
+	// 读取配置文件
 	char ip[4096] = {0};
 	unsigned short port = 0;
 	char username[4096] = {0};
 	char password[4096] = {0};
+	char stream_server_protocol[4096] = {0};
+	char stream_server_ip[4096] = {0};
+	char stream_server_port[4096] = {0};
+	char source_stream_url[4096] = {0};
+	char target_stream_name[4096] = {0};
+	char target_stream_url[4096] = {0};
 
 	GetPrivateProfileStringA(CFG_NAME, "DEV_IP", "192.168.1.108", ip, 4096, config_ini);
 	port = (unsigned short)GetPrivateProfileIntA(CFG_NAME, "DEV_PORT", 37777, config_ini);
 	GetPrivateProfileStringA(CFG_NAME, "DEV_USER", "admin", username, 4096, config_ini);
 	GetPrivateProfileStringA(CFG_NAME, "DEV_PASS", "admin", password, 4096, config_ini);
 	int auto_realstream = GetPrivateProfileIntA(CFG_NAME, "AUTO_REALSTREAM", 1, config_ini);
+	GetPrivateProfileStringA(CFG_NAME, "SOURCE_STREAM", "rtsp://admin:admin@192.168.1.108/", source_stream_url, 4096, config_ini);
+	GetPrivateProfileStringA(CFG_NAME, "TARGET_STREAM_NAME", "car_video.sdp", target_stream_name, 4096, config_ini);
+	GetPrivateProfileStringA(CFG_NAME, "TARGET_STREAM_URL", "rtsp://127.0.0.1/car_video.sdp", target_stream_url, 4096, config_ini);
 
-	std::cout<<"DH_DeviceControl login - ip : "<<ip<<", port : "<<port<<", user : "<<username<<", pass : "<<password<<std::endl;
+	GetPrivateProfileStringA(STREAM_SERVER_NAME, "PROTOCOL", "RTSP", stream_server_protocol, 4096, config_ini);
+	GetPrivateProfileStringA(STREAM_SERVER_NAME, "IP", "127.0.0.1", stream_server_ip, 4096, config_ini);
+	GetPrivateProfileStringA(STREAM_SERVER_NAME, "PORT", "554", stream_server_port, 4096, config_ini);
+
+	device_ip_ = ip;
+	device_username_ = username;
+	device_password_ = password;
+
+	stream_server_protocol_ = stream_server_protocol;
+	stream_server_ip_ = stream_server_ip;
+	stream_server_port_ = stream_server_port;
+	source_stream_url_ = source_stream_url;
+	target_stream_name_ = target_stream_name;
+	target_stream_url_ = target_stream_url;
+
+	// 登录
 	int errCode = OnLogin(ip, port, username, password);
 	if (errCode != 0)
-	{
 		return errCode;
-	}
 
+	// 开启点流
 	if (auto_realstream)
-	{
 		errCode = OnStartRealPlay();
-	}
 
 	return errCode;
 }
@@ -106,6 +132,10 @@ int bgDahuaDeviceControl::OnInit(const char *config_ini)
 int bgDahuaDeviceControl::OnLogin(const char *device_ip, unsigned short device_port, const char *username, const char *password)
 {
 	int errCode = 0;
+
+	device_ip_ = device_ip;
+	device_port_ = device_port;
+
 	NET_DEVICEINFO_Ex device_info_;
 	login_id_ = CLIENT_LoginEx2(device_ip, device_port, username, password, EM_LOGIN_SPEC_CAP_TCP, nullptr, &device_info_, &errCode);
 	if (login_id_ == 0)
@@ -116,7 +146,11 @@ int bgDahuaDeviceControl::OnLogin(const char *device_ip, unsigned short device_p
 	}
 
 	// 登录成功后，查询设备状态
-	// 我们在这里先什么都不干
+	// 我们还可以做一些事情：
+	//  - 校时
+	//  - 设置水印
+	//  - ...
+	// 但是我们在这里先什么都不干
 
 	return 0;
 }
@@ -345,13 +379,14 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 
 	// 成功之后，将信息送入推流器，准备推流
 	// 憋了一个超级大招，直接用ffmpeg拉流转发，由于车载端
-	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/ -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1/dh_dvr.sdp
+	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/ -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:554/dh_dvr.sdp
 	// 参数：
 	// 1. ffmpeg.exe的完整路径
 	// 2. 摄像头登录账号、密码
 	// 3. 摄像头IP地址
 	// 4. 推流目标服务器地址
-
+	if (!stream_pusher_management_->is_working_)
+		errCode = stream_pusher_management_->StartPush(source_stream_url_.c_str(), stream_server_ip_.c_str(), stream_server_port_.c_str(), stream_server_protocol_.c_str(), target_stream_name_.c_str());
 
 	return errCode;
 }
@@ -360,9 +395,31 @@ int bgDahuaDeviceControl::OnStopRealPlay()
 {
 	int errCode = 0;
 
+	stream_pusher_management_->is_working_ = false;
+	stream_pusher_management_->StopPush();
 	CLIENT_StopRealPlayEx(real_handle_);
 
 	return errCode;
+}
+
+bool bgDahuaDeviceControl::IsRealPlay()
+{
+	return stream_pusher_management_->is_working_;
+}
+
+std::string bgDahuaDeviceControl::GetRealStreamProtocol()
+{
+	return stream_server_protocol_;
+}
+
+std::string bgDahuaDeviceControl::GetRealStreamName()
+{
+	return target_stream_name_;
+}
+
+std::string bgDahuaDeviceControl::GetRealStreamUrl()
+{
+	return target_stream_url_;
 }
 
 void bgDahuaDeviceControl::CacheRealStreamData(const unsigned char *data, int data_len)

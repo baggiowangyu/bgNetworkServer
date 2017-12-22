@@ -19,6 +19,9 @@
     <Filter Include="信令生成">
       <UniqueIdentifier>{d5ad66b9-59ea-4476-b614-45d0ae0edc7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ResponseHandle">
+      <UniqueIdentifier>{5fec213a-8851-4eb6-ae2e-d4baea668b24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -51,6 +54,9 @@
     <ClInclude Include="bgCommand.h">
       <Filter>信令生成</Filter>
     </ClInclude>
+    <ClInclude Include="bgResponseHandle.h">
+      <Filter>ResponseHandle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgCarEndpoint.cpp">
@@ -67,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="bgCommand.cpp">
       <Filter>信令生成</Filter>
+    </ClCompile>
+    <ClCompile Include="bgResponseHandle.cpp">
+      <Filter>ResponseHandle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

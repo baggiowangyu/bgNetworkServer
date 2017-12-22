@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9F987AD0-6645-469E-87A6-41BEBC2035CF}</ProjectGuid>
+    <ProjectGuid>{931540C2-5533-41A9-9463-F85A5B24FDC2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>bgHttpServer</RootNamespace>
+    <RootNamespace>bgWatchDog</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -45,31 +45,20 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>OS_WIN;_WIN32_WINNT=0x0602;WINVER=0x0602;WIN32;_DEBUG;_CONSOLE;COMPONENT_BUILD;WIN32_LEAN_AND_MEAN;PSAPI_VERSION=1;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;CHROMIUM_BUILD;TOOLKIT_VIEWS=1;USE_LIBJPEG_TURBO=1;ENABLE_ONE_CLICK_SIGNIN;ENABLE_REMOTING=1;ENABLE_WEBRTC=1;ENABLE_CONFIGURATION_POLICY;ENABLE_INPUT_SPEECH;ENABLE_NOTIFICATIONS;NO_TCMALLOC;ENABLE_GPU=1;ENABLE_EGLIMAGE=1;__STD_C;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NTDDI_VERSION=0x06020000;ENABLE_TASK_MANAGER=1;ENABLE_EXTENSIONS=1;ENABLE_PLUGIN_INSTALLATION=1;ENABLE_PLUGINS=1;ENABLE_SESSION_SERVICE=1;ENABLE_THEMES=1;ENABLE_AUTOFILL_DIALOG=1;ENABLE_BACKGROUND=1;ENABLE_AUTOMATION=1;ENABLE_GOOGLE_NOW=1;ENABLE_LANGUAGE_DETECTION=1;ENABLE_PRINTING=1;ENABLE_CAPTIVE_PORTAL_DETECTION=1;ENABLE_APP_LIST=1;ENABLE_MESSAGE_CENTER=1;ENABLE_SETTINGS_APP=1;ENABLE_MANAGED_USERS=1;NO_NSPR_10_SUPPORT;NSS_ENABLE_ECC;NSS_STATIC;NSS_USE_STATIC_LIBS;USE_UTIL_DIRECTLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ext\HP-Socket\include;..\Common\Lib\openssl\10.0\x86\include;..\ext\google\chromium\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\ext\HP-Socket\lib\x86;..\ext\google\chromium\lib\x86</AdditionalLibraryDirectories>
-      <AdditionalDependencies>base.lib;HPSocket4C-SSL_U.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>COPY $(ProjectDir)config.ini $(OutDir)
-XCOPY /D /Y $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)
-XCOPY /D /Y $(SolutionDir)\ext\google\chromium\bin\x86\base.dll $(OutDir)</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -83,21 +72,18 @@ XCOPY /D /Y $(SolutionDir)\ext\google\chromium\bin\x86\base.dll $(OutDir)</Comma
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="config.ini" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bgHttpBusinessPlugins.h" />
-    <ClInclude Include="bgHttpServerImp.h" />
-    <ClInclude Include="bgPluginManagement.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bgHttpServer.cpp" />
-    <ClCompile Include="bgHttpServerImp.cpp" />
-    <ClCompile Include="bgPluginManagement.cpp" />
-    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="bgWatchDog.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

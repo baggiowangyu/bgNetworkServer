@@ -62,17 +62,17 @@ StreamPusherManagement::~StreamPusherManagement()
 
 }
 
-int StreamPusherManagement::StartPush(const char *source_url, const char *target_url, const char *protocol /* = "rtsp" */, bool keep_push /* = true */)
+int StreamPusherManagement::StartPush(const char *source_url, const char *target_ip, const char *target_port /* = "554" */, const char *protocol /* = "rtsp" */, const char *stream_name /* = "car_video.sdp" */, bool keep_push /* = true */)
 {
 	int errCode = 0;
 
 	source_url_ = source_url;
-	target_url_ = target_url;
+	target_url_ = target_ip;
 	keep_push_ = keep_push;
 
 	char param[4096] = {0};
 	if (_stricmp("rtsp", protocol) == 0)
-		sprintf_s(param, 4096, "-i %s -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp target_url", source_url, target_url);
+		sprintf_s(param, 4096, "-i %s -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp %s://%s:%s/%s", source_url, protocol, target_ip, target_port, stream_name);
 	else
 		return ERROR_NOT_SUPPORTED;
 

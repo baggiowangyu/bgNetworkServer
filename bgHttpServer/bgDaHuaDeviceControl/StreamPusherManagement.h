@@ -20,7 +20,7 @@ public:
 	~StreamPusherManagement();
 
 public:
-	int StartPush(const char *source_url, const char *target_url, const char *protocol = "rtsp", bool keep_push = true);
+	int StartPush(const char *source_url, const char *target_ip, const char *target_port = "554", const char *protocol = "rtsp", const char *stream_name = "car_video.sdp", bool keep_push = true);
 	void StopPush();
 
 public:

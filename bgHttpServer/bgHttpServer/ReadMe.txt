@@ -61,6 +61,19 @@
 		"subcmd":"realvideo",
 		"value":"rtsp://123.123.123.123/car/yueA-12345/8",
 	}
+  - 查询实时流地址
+	{
+		"id":"56C90602-ECA8-4350-9208-BE9141743E61",
+		"manufacturer":"dh|hik|gxx",
+		"commandtype":"stream",
+		"subcmd":"query_realvideo_url",
+	}
+	{
+		"id":"56C90602-ECA8-4350-9208-BE9141743E61",
+		"commandtype":"stream",
+		"subcmd":"query_realvideo_url",
+		"stream_url":"rtsp://123.123.123.123/car/yueA-12345/8"
+	}
 
 - 直播流地址：/goldmsg/car/Live.flv?manufacturer=dh
 - 测试直播流地址：http://127.0.0.1:9876/goldmsg/car/Live.flv?manufacturer=dh

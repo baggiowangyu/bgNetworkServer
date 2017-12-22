@@ -186,6 +186,8 @@ int bgHttpServerImp::OnStart()
 
 void bgHttpServerImp::OnDestroy()
 {
+	// 销毁各个插件
+
 	if (use_https_service_)
 	{
 		::HP_Server_Stop(https_server_);
@@ -349,21 +351,6 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	std::cout<<"bgHttpServerImp::OnMessageComplete connect_id : "<<dwConnID<<std::endl;
 	// 消息接收完成，取出调用的Object，分发到所有的处理插件中
 	USES_CONVERSION;
-
-	//// 展示所有的HTTP头信息
-	//DWORD dwHeaderCount = 0;
-	//::HP_HttpServer_GetAllHeaders(pSender, dwConnID, nullptr, &dwHeaderCount);
-
-	//if(dwHeaderCount > 0)
-	//{
-	//	THeader *headers = new THeader[dwHeaderCount];
-	//	if(::HP_HttpServer_GetAllHeaders(pSender, dwConnID, headers, &dwHeaderCount))
-	//	{
-	//		for(DWORD i = 0; i < dwHeaderCount; i++)
-	//			std::cout<<"client header : "<<headers[i].name<<" - "<<headers[i].value<<std::endl;
-	//	}
-	//	delete [] headers;
-	//}
 
 	// 我们直接在这里处理相关业务
 	// 至于POST的数据，应该要与ConnectID挂钩

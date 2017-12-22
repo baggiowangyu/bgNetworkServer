@@ -1,8 +1,10 @@
 #ifndef _BG_DAHUA_DEVICE_CONTROL_H_
 #define _BG_DAHUA_DEVICE_CONTROL_H_
 
+#include <string>
 #include <windows.h>
 
+class StreamPusherManagement;
 
 class bgDahuaDeviceRealStreamNotifer
 {
@@ -72,6 +74,10 @@ public:
 	int OnStopRealPlay();
 	bool IsRealPlay();
 
+	std::string GetRealStreamProtocol();
+	std::string GetRealStreamName();
+	std::string GetRealStreamUrl();
+
 public:
 	/**
 	 * 实时流数据缓冲与读取
@@ -84,6 +90,17 @@ public:
 	bgDahuaDeviceRealStreamNotifer *notifer_;
 
 private:
+	std::string device_ip_;
+	unsigned short device_port_;
+	std::string device_username_;
+	std::string device_password_;
+	std::string stream_server_protocol_;
+	std::string stream_server_ip_;
+	std::string stream_server_port_;
+	std::string target_stream_name_;
+	std::string target_stream_url_;
+
+private:
 	LONG login_id_;
 	LONG real_handle_;
 	int move_speed_;
@@ -92,6 +109,10 @@ private:
 	CRITICAL_SECTION cache_section_;
 	unsigned char cache_data_[40960];	// 默认数据缓冲区40K
 	int cache_data_len_;
+
+private:
+	std::string source_stream_url_;
+	StreamPusherManagement *stream_pusher_management_;
 };
 
 #endif//_BG_DAHUA_DEVICE_CONTROL_H_

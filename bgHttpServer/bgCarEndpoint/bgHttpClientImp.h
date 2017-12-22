@@ -3,6 +3,13 @@
 
 #include "HPSocket4C-SSL.h"
 
+typedef struct _COMMAND_DATA_
+{
+	unsigned char *cmddata_;
+	unsigned long long cmddata_buffer_len_;
+	unsigned long long cmddata_size_;
+} COMMAND_DATA, *PCOMMAND_DATA;
+
 class bgHttpClientImp
 {
 public:

@@ -431,7 +431,7 @@ void CbgCarEndpointDlg::OnBnClickedBtnAperyureMinus()
 
 void CbgCarEndpointDlg::OnBnClickedBtnRealvideo()
 {
-	std::string request_data = bgCommand::GenerateStreamCommand("realvideo", "dh", "", "Start");
+	std::string request_data = bgCommand::GenerateStreamCommand("query_realvideo_url", "dh", "", "Start");
 
 	// ·¢ËÍHTTPÇëÇó
 	http_client_->OnSendHttpRequest("/goldmsg/car/DeviceControl", nullptr, 0, "POST", (const unsigned char *)request_data.c_str(), request_data.size());

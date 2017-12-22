@@ -50,14 +50,15 @@ int _tmain(int argc, _TCHAR* argv[])
 	base::FilePath log_directory = current_dirctory.AppendASCII("log");
 	base::FilePath log_file_path = log_directory.AppendASCII(log_file_name);
 
-	logging::InitLogging(base::SysUTF8ToWide(log_file_path.AsUTF8Unsafe()).c_str(),
-		logging::LOG_TO_BOTH_FILE_AND_SYSTEM_DEBUG_LOG, logging::DONT_LOCK_LOG_FILE,
-		logging::APPEND_TO_OLD_LOG_FILE, logging::ENABLE_DCHECK_FOR_NON_OFFICIAL_RELEASE_BUILDS);
+	//logging::InitLogging(base::SysUTF8ToWide(log_file_path.AsUTF8Unsafe()).c_str(),
+	//	logging::LOG_TO_BOTH_FILE_AND_SYSTEM_DEBUG_LOG, logging::DONT_LOCK_LOG_FILE,
+	//	logging::APPEND_TO_OLD_LOG_FILE, logging::ENABLE_DCHECK_FOR_NON_OFFICIAL_RELEASE_BUILDS);
 
 	// 初始化HTTP服务器实体类
 	base::FilePath config_file = current_dirctory.AppendASCII("config.ini");
+	std::string config_path = config_file.AsUTF8Unsafe();
 	bgHttpServerImp http_server;
-	int errCode = http_server.OnInit(config_file.AsUTF8Unsafe().c_str());
+	int errCode = http_server.OnInit(config_path.c_str());
 	errCode = http_server.OnStart();
 
 	while (true)

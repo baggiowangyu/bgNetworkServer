@@ -136,6 +136,10 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 				errCode = ERROR_BAD_COMMAND;
 			else
 			{
+				// 处理返回结果
+				Json::Value result;
+				result["id"] = Json::Value(json_root["id"].asString());
+
 				if (json_root["commandtype"].asString().compare("PTZControl") == 0)
 				{
 					// 这是云台控制指令
@@ -158,21 +162,33 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 					std::string manufacturer = json_root["manufacturer"].asString();
 					std::string cmdstate = json_root["state"].asString();
 
-					if (_stricmp(cmdstate.c_str(), "Start") == 0)
+					if (_stricmp("realvideo", subcmd.c_str()) == 0)
 					{
-						if (manufacturer.compare("dh") == 0)
-							errCode = dahua_device_->OnStartRealPlay();
+						if (_stricmp(cmdstate.c_str(), "Start") == 0)
+						{
+							if (manufacturer.compare("dh") == 0)
+							{
+								errCode = dahua_device_->OnStartRealPlay();
+								if (errCode == 0)
+								{
+									result["stream_protocol"] = Json::Value(dahua_device_->GetRealStreamProtocol());
+									result["stream_name"] = Json::Value(dahua_device_->GetRealStreamName());
+								}
+							}
+						}
+						else
+						{
+							if (manufacturer.compare("dh") == 0)
+								errCode = dahua_device_->OnStopRealPlay();
+						}
 					}
-					else
+					else if (_stricmp("query_realvideo_url", subcmd.c_str()) == 0)
 					{
-						if (manufacturer.compare("dh") == 0)
-							errCode = dahua_device_->OnStopRealPlay();
+						std::string stream_url = dahua_device_->GetRealStreamUrl();
+						result["stream_url"] = Json::Value(stream_url);
+						errCode = 0;
 					}
 				}
-
-				// 处理返回结果
-				Json::Value result;
-				result["id"] = Json::Value(json_root["id"].asString());
 
 				if (errCode == 0)
 					result["status"] = Json::Value("OK");
