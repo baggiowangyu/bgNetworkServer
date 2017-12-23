@@ -6,6 +6,9 @@
 
 #include <atlstr.h>
 
+#include "log4cxx/logger.h"
+#include "log4cxx/logstring.h"
+
 #include "HPSocket4C-SSL.h"
 
 class bgHttpServerImp
@@ -42,6 +45,9 @@ public:
 	static int CALLBACK SIN_ServerNameCallback(LPCTSTR lpszServerName);
 
 public:
+	void SetLogger(log4cxx::LoggerPtr *logger);
+
+public:
 	int OnInit(const char *config_ini);
 	int OnStart();
 	void OnDestroy();
@@ -60,6 +66,9 @@ public:
 	int use_https_service_;
 	TCHAR https_server_ip_[4096];
 	USHORT https_port_;
+
+private:
+	log4cxx::LoggerPtr *logger_;
 };
 
 #endif//_BG_HTTP_SERVER_IMP_H_

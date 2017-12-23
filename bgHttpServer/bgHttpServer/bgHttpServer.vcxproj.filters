@@ -29,6 +29,7 @@
   <ItemGroup>
     <None Include="ReadMe.txt" />
     <None Include="config.ini" />
+    <None Include="log4cxx.properties" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

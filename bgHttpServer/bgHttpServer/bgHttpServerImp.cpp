@@ -55,6 +55,11 @@ int CALLBACK bgHttpServerImp::SIN_ServerNameCallback(LPCTSTR lpszServerName)
 	return SPECIAL_SERVER_INDEX;
 }
 
+void bgHttpServerImp::SetLogger(log4cxx::LoggerPtr *logger)
+{
+	logger_ = logger;
+}
+
 int bgHttpServerImp::OnInit(const char *config_ini)
 {
 	int errCode = 0;

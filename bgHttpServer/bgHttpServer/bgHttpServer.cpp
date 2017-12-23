@@ -12,6 +12,10 @@
 #include "base/strings/sys_string_conversions.h"
 #include "base/logging.h"
 
+#include "log4cxx/logger.h"
+#include "log4cxx/logstring.h"
+#include "log4cxx/propertyconfigurator.h"
+
 #include "bgHttpServerImp.h"
 
 #include <iostream>
@@ -41,30 +45,31 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 	}
 
+	// 读取日志模块配置文件
+	base::FilePath logcfg_path = current_dirctory.AppendASCII("log4cxx.cfg");
+	log4cxx::PropertyConfigurator::configure(logcfg_path.AsUTF8Unsafe());
+
 	// 初始化日志模块
 	base::Time current_time = base::Time::Now();
 	base::Time::Exploded time;
 	current_time.UTCExplode(&time);
 	std::string log_file_name = base::StringPrintf("log_%d-%02d-%02d_%02d%02d%02d.log", 
 		time.year, time.month, time.day_of_month, time.hour, time.minute, time.second);
-	base::FilePath log_directory = current_dirctory.AppendASCII("log");
-	base::FilePath log_file_path = log_directory.AppendASCII(log_file_name);
+	log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger(log_file_name);
 
-	//logging::InitLogging(base::SysUTF8ToWide(log_file_path.AsUTF8Unsafe()).c_str(),
-	//	logging::LOG_TO_BOTH_FILE_AND_SYSTEM_DEBUG_LOG, logging::DONT_LOCK_LOG_FILE,
-	//	logging::APPEND_TO_OLD_LOG_FILE, logging::ENABLE_DCHECK_FOR_NON_OFFICIAL_RELEASE_BUILDS);
+	LOG4CXX_TRACE(logger, "[跟踪]这是第一条日志");
 
-	// 初始化HTTP服务器实体类
-	base::FilePath config_file = current_dirctory.AppendASCII("config.ini");
-	std::string config_path = config_file.AsUTF8Unsafe();
-	bgHttpServerImp http_server;
-	int errCode = http_server.OnInit(config_path.c_str());
-	errCode = http_server.OnStart();
+	//// 初始化HTTP服务器实体类
+	//base::FilePath config_file = current_dirctory.AppendASCII("config.ini");
+	//std::string config_path = config_file.AsUTF8Unsafe();
+	//bgHttpServerImp http_server;
+	//int errCode = http_server.OnInit(config_path.c_str());
+	//errCode = http_server.OnStart();
 
-	while (true)
-	{
-		Sleep(5000);
-	}
+	//while (true)
+	//{
+	//	Sleep(5000);
+	//}
 
 	return 0;
 }
