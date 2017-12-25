@@ -27,6 +27,9 @@
     <ClInclude Include="StreamPusherManagement.h">
       <Filter>推流器管理</Filter>
     </ClInclude>
+    <ClInclude Include="winternl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgDaHuaDeviceControl.cpp">

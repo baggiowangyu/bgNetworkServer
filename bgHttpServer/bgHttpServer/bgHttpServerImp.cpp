@@ -1,7 +1,7 @@
 #include "bgHttpServerImp.h"
 #include "bgPluginManagement.h"
 
-#include "..\bgLogging\extern_logging.h"
+#include "bgLogging.h"
 
 #include <iostream>
 #include <atlconv.h>
@@ -85,7 +85,7 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		http_server_ = ::Create_HP_HttpServer(http_server_listener_);
 		if (!http_server_)
 		{
-			LOG4CXX_ERROR(rootLogger, "Create_HP_HttpServer failed.");
+			BG_LOG_ERROR("Create_HP_HttpServer failed.");
 			return -1;
 		}
 	}
@@ -101,21 +101,21 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		https_server_ = ::Create_HP_HttpsServer(http_server_listener_);
 		if (!https_server_)
 		{
-			LOG4CXX_ERROR(rootLogger, "Create_HP_HttpsServer failed.");
+			BG_LOG_ERROR("Create_HP_HttpsServer failed.");
 			return -2;
 		}
 
 		BOOL bret = ::HP_SSLServer_SetupSSLContext(https_server_, SSL_VM_NONE, SRV_CERT, SRV_PRI, SRV_PIN, CA_CERT, SIN_ServerNameCallback);
 		if (!bret)
 		{
-			LOG4CXX_ERROR(rootLogger, "HP_SSLServer_SetupSSLContext failed.");
+			BG_LOG_ERROR("HP_SSLServer_SetupSSLContext failed.");
 			return -3;
 		}
 
 		SPECIAL_SERVER_INDEX = ::HP_SSLServer_AddSSLContext(https_server_, SSL_VM_NONE, SRV_CERT_2, SRV_PRI_2, SRV_PIN_2, CA_CERT_2);
 		if (SPECIAL_SERVER_INDEX <= 0)
 		{
-			LOG4CXX_ERROR(rootLogger, "HP_SSLServer_AddSSLContext failed.");
+			BG_LOG_ERROR("HP_SSLServer_AddSSLContext failed.");
 			return -4;
 		}
 	}
@@ -167,12 +167,12 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		if (errCode)
 		{
 			sprintf_s(msg, 4096, "Install Plugin : %s failed...", T2A(plugin_name));
-			LOG4CXX_ERROR(rootLogger, msg);
+			BG_LOG_ERROR(msg);
 		}
 		else
 		{
 			sprintf_s(msg, 4096, "Install Plugin : %s success...", T2A(plugin_name));
-			LOG4CXX_INFO(rootLogger, msg);
+			BG_LOG_INFO(msg);
 		}
 	}
 
@@ -196,7 +196,7 @@ int bgHttpServerImp::OnStart()
 			LPCTSTR errstr = ::HP_Server_GetLastErrorDesc(http_server_);
 			errCode = ::HP_Server_GetLastError(http_server_);
 			sprintf_s(msg, 4096, "Start HTTP Server failed. : %s, errcode : %d.", T2A(errstr), errCode);
-			LOG4CXX_ERROR(rootLogger, msg);
+			BG_LOG_ERROR(msg);
 			return errCode;
 		}
 	}
@@ -207,11 +207,12 @@ int bgHttpServerImp::OnStart()
 		if (!bret)
 		{
 			// 错误描述
-			::HP_Server_GetLastErrorDesc(https_server_);
+			USES_CONVERSION;
+			LPCTSTR errstr = ::HP_Server_GetLastErrorDesc(https_server_);
 			errCode = ::HP_Server_GetLastError(https_server_);
 
 			sprintf_s(msg, 4096, "Start HTTPS Server failed. : %s, errcode : %d.", T2A(errstr), errCode);
-			LOG4CXX_ERROR(rootLogger, msg);
+			BG_LOG_ERROR(msg);
 
 			::HP_Server_Stop(http_server_);
 		}
@@ -262,7 +263,7 @@ En_HP_HandleResult __stdcall bgHttpServerImp::OnAccept(HP_Server pSender, HP_CON
 	// 如果能拿到客户端的IP和端口最好
 	char msg[4096] = {0};
 	sprintf_s(msg, 4096, "There is a client connected.. connect_id is %d", dwConnID);
-	LOG4CXX_INFO(rootLogger, msg);
+	BG_LOG_INFO(msg);
 	return HR_OK;
 }
 
@@ -290,7 +291,7 @@ En_HP_HandleResult __stdcall bgHttpServerImp::OnClose(HP_Server pSender, HP_CONN
 	// 这里是指关闭
 	char msg[4096] = {0};
 	sprintf_s(msg, 4096, "There is a client closed.. connect_id is %d", dwConnID);
-	LOG4CXX_INFO(rootLogger, msg);
+	BG_LOG_INFO(msg);
 	return HR_OK;
 }
 
@@ -325,6 +326,8 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeadersComplete(HP_HttpServer
 
 	// 遍历所有业务插件，将消息分发进去
 	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
+	if (plugin == nullptr)
+		return HPR_OK; 
 
 	do 
 	{
@@ -351,6 +354,8 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnBody(HP_HttpServer pSender, H
 
 	// 遍历所有业务插件，将消息分发进去
 	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
+	if (plugin == nullptr)
+		return HPR_OK;
 
 	do 
 	{
@@ -384,7 +389,7 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 {
 	char msg[4096] = {0};
 	sprintf_s(msg, 4096, "There is a client request will be handled.. connect_id is %d", dwConnID);
-	LOG4CXX_INFO(rootLogger, msg);
+	BG_LOG_INFO(msg);
 
 	// 消息接收完成，取出调用的Object，分发到所有的处理插件中
 	USES_CONVERSION;
@@ -401,6 +406,8 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	bool is_handled = false;
 
 	bgHttpBusinessPlugins *plugin = plugin_management_.GetFirstPlugin();
+	if (plugin == nullptr)
+		return HPR_OK;
 
 	do 
 	{
@@ -418,8 +425,8 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 				En_HP_SocketError err = ::HP_Server_GetLastError(pSender);
 				LPCTSTR errstr = ::HP_GetSocketErrorDesc(err);
 
-				sprintf_s(msg, 4096, "Send response failed. %s, errCode : %d, connect_id is %d", errstr, err dwConnID);
-				LOG4CXX_WARN(rootLogger, msg);
+				sprintf_s(msg, 4096, "Send response failed. %s, errCode : %d, connect_id is %d", errstr, err, dwConnID);
+				BG_LOG_WARN(msg);
 			}
 
 			// 清理应答数据

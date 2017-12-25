@@ -23,8 +23,12 @@ public:
 	int StartPush(const char *source_url, const char *target_ip, const char *target_port = "554", const char *protocol = "rtsp", const char *stream_name = "car_video.sdp", bool keep_push = true);
 	void StopPush();
 
+private:
+	bool IsExistPusher(const char *commandline);
+
 public:
 	SHELLEXECUTEINFOA shell_info_;
+	HANDLE pusher_handle_;
 	std::string source_url_;
 	std::string target_url_;
 	bool keep_push_;

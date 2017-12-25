@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "bgDeviceControl.h"
 #include "bgDaHuaDeviceControl.h"
+#include "bgLogging.h"
 #include "json/json.h"
 
 #define COMMAND_PATH		"/goldmsg/car/DeviceControl"
@@ -127,8 +128,10 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			// 输出缓冲
 			std::cout<<"Start handle request : "<<std::endl;
 			std::cout<<request_data.c_str()<<std::endl;
+			//BG_LOG_INFO()
 
 			// 将请求数据转换为json对象进行处理
+			// 由于我们这里是服务器程序，要妥善处理异常情况，这里应当使用防御式编程
 			Json::Reader reader;
 			Json::Value json_root;
 
@@ -138,73 +141,94 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			{
 				// 处理返回结果
 				Json::Value result;
-				result["id"] = Json::Value(json_root["id"].asString());
-
-				if (json_root["commandtype"].asString().compare("PTZControl") == 0)
+				
+				// 首先检查几个必须有的字段
+				// id/commandtype/subcmd/manufacturer
+				if (json_root.isMember("id") && json_root.isMember("commandtype") && json_root.isMember("subcmd") && json_root.isMember("manufacturer"))
 				{
-					// 这是云台控制指令
-					std::string subcmd = json_root["subcmd"].asString();
-					std::string manufacturer = json_root["manufacturer"].asString();
-					std::string cmdval = json_root["value"].asString();
-					std::string cmdstate = json_root["state"].asString();
-					int speed = json_root["speed"].asInt();
+					result["id"] = Json::Value(json_root["id"].asString());
 
-					// 发送控制指令到设备
-					if (manufacturer.compare("dh") == 0)
-						errCode = dahua_device_->OnPTZControl(subcmd.c_str(), cmdval.c_str(), 0, speed, 0, cmdstate.compare("Stop") == 0 ? TRUE : FALSE);
-					else
-						errCode = ERROR_NOT_SUPPORTED;
-				}
-				else if (json_root["commandtype"].asString().compare("stream") == 0)
-				{
-					// 这是点流指令，向设备发送点流请求
-					std::string subcmd = json_root["subcmd"].asString();
-					std::string manufacturer = json_root["manufacturer"].asString();
-					std::string cmdstate = json_root["state"].asString();
-
-					if (_stricmp("realvideo", subcmd.c_str()) == 0)
+					if (json_root["commandtype"].asString().compare("PTZControl") == 0)
 					{
-						if (_stricmp(cmdstate.c_str(), "Start") == 0)
+						// 这是云台控制指令
+						std::string subcmd = json_root["subcmd"].asString();
+						std::string manufacturer = json_root["manufacturer"].asString();
+
+						// 云台控制命令必须有的参数：state/value/speed
+						if (json_root.isMember("state") && json_root.isMember("value") && json_root.isMember("speed"))
 						{
+							std::string cmdval = json_root["value"].asString();
+							std::string cmdstate = json_root["state"].asString();
+							int speed = json_root["speed"].asInt();
+
+							// 发送控制指令到设备
 							if (manufacturer.compare("dh") == 0)
+								errCode = dahua_device_->OnPTZControl(subcmd.c_str(), cmdval.c_str(), 0, speed, 0, cmdstate.compare("Stop") == 0 ? TRUE : FALSE);
+							else
+								errCode = ERROR_NOT_SUPPORTED;
+						}
+						else
+							errCode = ERROR_BAD_COMMAND;
+					}
+					else if (json_root["commandtype"].asString().compare("stream") == 0)
+					{
+						// 这是点流指令，向设备发送点流请求
+						std::string subcmd = json_root["subcmd"].asString();
+						std::string manufacturer = json_root["manufacturer"].asString();
+
+						
+						if (_stricmp("realvideo", subcmd.c_str()) == 0)
+						{
+							// 实时点流命令，判断是开始点流还是结束点流
+							if (json_root.isMember("state"))
 							{
-								errCode = dahua_device_->OnStartRealPlay();
-								if (errCode == 0)
+								std::string cmdstate = json_root["state"].asString();
+								if (_stricmp(cmdstate.c_str(), "Start") == 0)
 								{
-									result["stream_protocol"] = Json::Value(dahua_device_->GetRealStreamProtocol());
-									result["stream_name"] = Json::Value(dahua_device_->GetRealStreamName());
+									// 开始命令，判断是哪个
+									if (manufacturer.compare("dh") == 0)
+									{
+										errCode = dahua_device_->OnStartRealPlay();
+										if (errCode == 0)
+										{
+											result["stream_protocol"] = Json::Value(dahua_device_->GetRealStreamProtocol());
+											result["stream_name"] = Json::Value(dahua_device_->GetRealStreamName());
+										}
+									}
+								}
+								else
+								{
+									if (manufacturer.compare("dh") == 0)
+										errCode = dahua_device_->OnStopRealPlay();
 								}
 							}
 						}
-						else
+						else if (_stricmp("query_realvideo_url", subcmd.c_str()) == 0)
 						{
-							if (manufacturer.compare("dh") == 0)
-								errCode = dahua_device_->OnStopRealPlay();
+							std::string stream_url = dahua_device_->GetRealStreamUrl();
+							result["stream_url"] = Json::Value(stream_url);
+							errCode = 0;
 						}
+						else
+							errCode = ERROR_BAD_COMMAND;
 					}
-					else if (_stricmp("query_realvideo_url", subcmd.c_str()) == 0)
+
+					if (errCode == 0)
+						result["status"] = Json::Value("OK");
+					else
+						result["status"] = Json::Value("FAIL");
+
+					Json::StyledWriter sw;
+					std::string result_data = sw.write(result);
+
+					std::cout<<result_data.c_str()<<std::endl;
+
+					if (response_len)
 					{
-						std::string stream_url = dahua_device_->GetRealStreamUrl();
-						result["stream_url"] = Json::Value(stream_url);
-						errCode = 0;
+						*response_len = result_data.size();
+						*response_data = new unsigned char[*response_len + 1];
+						memcpy(*response_data, result_data.c_str(), result_data.size());
 					}
-				}
-
-				if (errCode == 0)
-					result["status"] = Json::Value("OK");
-				else
-					result["status"] = Json::Value("FAIL");
-
-				Json::StyledWriter sw;
-				std::string result_data = sw.write(result);
-
-				std::cout<<result_data.c_str()<<std::endl;
-
-				if (response_len)
-				{
-					*response_len = result_data.size();
-					*response_data = new unsigned char[*response_len + 1];
-					memcpy(*response_data, result_data.c_str(), result_data.size());
 				}
 			}
 

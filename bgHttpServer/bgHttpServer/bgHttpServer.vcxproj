@@ -50,17 +50,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>OS_WIN;_WIN32_WINNT=0x0602;WINVER=0x0602;WIN32;_DEBUG;_CONSOLE;COMPONENT_BUILD;WIN32_LEAN_AND_MEAN;PSAPI_VERSION=1;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;CHROMIUM_BUILD;TOOLKIT_VIEWS=1;USE_LIBJPEG_TURBO=1;ENABLE_ONE_CLICK_SIGNIN;ENABLE_REMOTING=1;ENABLE_WEBRTC=1;ENABLE_CONFIGURATION_POLICY;ENABLE_INPUT_SPEECH;ENABLE_NOTIFICATIONS;NO_TCMALLOC;ENABLE_GPU=1;ENABLE_EGLIMAGE=1;__STD_C;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NTDDI_VERSION=0x06020000;ENABLE_TASK_MANAGER=1;ENABLE_EXTENSIONS=1;ENABLE_PLUGIN_INSTALLATION=1;ENABLE_PLUGINS=1;ENABLE_SESSION_SERVICE=1;ENABLE_THEMES=1;ENABLE_AUTOFILL_DIALOG=1;ENABLE_BACKGROUND=1;ENABLE_AUTOMATION=1;ENABLE_GOOGLE_NOW=1;ENABLE_LANGUAGE_DETECTION=1;ENABLE_PRINTING=1;ENABLE_CAPTIVE_PORTAL_DETECTION=1;ENABLE_APP_LIST=1;ENABLE_MESSAGE_CENTER=1;ENABLE_SETTINGS_APP=1;ENABLE_MANAGED_USERS=1;NO_NSPR_10_SUPPORT;NSS_ENABLE_ECC;NSS_STATIC;NSS_USE_STATIC_LIBS;USE_UTIL_DIRECTLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ext\HP-Socket\include;..\Common\Lib\openssl\10.0\x86\include;..\ext\google\chromium\include;..\ext\log4cxx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ext\HP-Socket\include;..\Common\Lib\openssl\10.0\x86\include;..\ext\google\chromium\include;..\ext\log4cxx\include;..\bgLogging;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\ext\HP-Socket\lib\x86;..\ext\google\chromium\lib\x86\Debug;..\ext\log4cxx\lib\x86\Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>base.lib;HPSocket4C-SSL_U.lib;log4cxx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\ext\HP-Socket\lib\x86;..\ext\google\chromium\lib\x86\Debug;..\ext\log4cxx\lib\x86\Debug;..\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>base.lib;HPSocket4C-SSL_U.lib;log4cxx.lib;bgLogging.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>COPY $(ProjectDir)config.ini $(OutDir)
+COPY $(ProjectDir)log4cxx.propertise $(OutDir)
 XCOPY /D /Y $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\google\chromium\bin\x86\Debug\base.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\log4cxx\bin\x86\Debug\log4cxx.dll $(OutDir)</Command>

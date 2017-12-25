@@ -16,8 +16,7 @@
 #include "log4cxx/logstring.h"
 #include "log4cxx/propertyconfigurator.h"
 
-#include "..\bgLogging\extern_logging.h"
-
+#include "bgLogging.h"
 #include "bgHttpServerImp.h"
 
 #include <iostream>
@@ -49,10 +48,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	// 读取日志模块配置文件
 	base::FilePath log4cxx_properties = current_dirctory.AppendASCII("log4cxx.properties");
-	log4cxx::PropertyConfigurator::configure(log4cxx_properties.value());
-
-	// 初始化日志模块
-	log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
+	BG_LOG_INIT(log4cxx_properties.value());
 
 	// 初始化HTTP服务器实体类
 	base::FilePath config_file = current_dirctory.AppendASCII("config.ini");

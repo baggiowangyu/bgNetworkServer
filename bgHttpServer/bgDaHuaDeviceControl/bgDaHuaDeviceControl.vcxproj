@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClInclude Include="bgDaHuaDeviceControl.h" />
     <ClInclude Include="StreamPusherManagement.h" />
+    <ClInclude Include="winternl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bgDaHuaDeviceControl.cpp" />

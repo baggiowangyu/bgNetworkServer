@@ -16,7 +16,14 @@ bgLogging::~bgLogging()
 
 }
 
-int bgLogging::OnInit(const char *propertise_path)
+int bgLogging::OnInit(const std::string propertise_path)
+{
+	log4cxx::PropertyConfigurator::configure(propertise_path);
+	logger_ = log4cxx::Logger::getRootLogger();
+	return 0;
+}
+
+int bgLogging::OnInit(const std::wstring propertise_path)
 {
 	log4cxx::PropertyConfigurator::configure(propertise_path);
 	logger_ = log4cxx::Logger::getRootLogger();
