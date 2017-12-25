@@ -1,6 +1,8 @@
 #include "bgHttpServerImp.h"
 #include "bgPluginManagement.h"
 
+#include "..\bgLogging\extern_logging.h"
+
 #include <iostream>
 #include <atlconv.h>
 
@@ -81,6 +83,11 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		http_port_ = (USHORT)GetPrivateProfileInt(_T("HTTP_SERVICE"), _T("PORT"), 80, A2T(config_ini));
 
 		http_server_ = ::Create_HP_HttpServer(http_server_listener_);
+		if (!http_server_)
+		{
+			LOG4CXX_ERROR(rootLogger, "Create_HP_HttpServer failed.");
+			return -1;
+		}
 	}
 	
 
@@ -92,13 +99,25 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 
 		// 初始化SSL环境参数，测试版里面暂时把各种证书、密钥等信息写死
 		https_server_ = ::Create_HP_HttpsServer(http_server_listener_);
+		if (!https_server_)
+		{
+			LOG4CXX_ERROR(rootLogger, "Create_HP_HttpsServer failed.");
+			return -2;
+		}
+
 		BOOL bret = ::HP_SSLServer_SetupSSLContext(https_server_, SSL_VM_NONE, SRV_CERT, SRV_PRI, SRV_PIN, CA_CERT, SIN_ServerNameCallback);
 		if (!bret)
-			return -1;
+		{
+			LOG4CXX_ERROR(rootLogger, "HP_SSLServer_SetupSSLContext failed.");
+			return -3;
+		}
 
 		SPECIAL_SERVER_INDEX = ::HP_SSLServer_AddSSLContext(https_server_, SSL_VM_NONE, SRV_CERT_2, SRV_PRI_2, SRV_PIN_2, CA_CERT_2);
 		if (SPECIAL_SERVER_INDEX <= 0)
-			return -2;
+		{
+			LOG4CXX_ERROR(rootLogger, "HP_SSLServer_AddSSLContext failed.");
+			return -4;
+		}
 	}
 	
 
@@ -134,6 +153,7 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 	for (int index = 0; index < plugins_count; ++index)
 	{
 		// 读取对应的
+		char msg[4096] = {0};
 		TCHAR app_name[4096] = {0};
 		_stprintf_s(app_name, _T("%s_%d"), _T("PLUGINS_"), index);
 
@@ -146,7 +166,13 @@ int bgHttpServerImp::OnInit(const char *config_ini)
 		errCode = plugin_management_.InstallPlugin(T2A(plugin_name), T2A(plugin_dll), config_ini);
 		if (errCode)
 		{
-			std::cout<<"Install Plugin : "<<T2A(plugin_name)<<" failed..."<<std::endl;
+			sprintf_s(msg, 4096, "Install Plugin : %s failed...", T2A(plugin_name));
+			LOG4CXX_ERROR(rootLogger, msg);
+		}
+		else
+		{
+			sprintf_s(msg, 4096, "Install Plugin : %s success...", T2A(plugin_name));
+			LOG4CXX_INFO(rootLogger, msg);
 		}
 	}
 
@@ -157,6 +183,7 @@ int bgHttpServerImp::OnStart()
 {
 	int errCode = 0;
 	BOOL bret = FALSE;
+	char msg[4096] = {0};
 
 	// 启动服务
 	if (use_http_service_)
@@ -168,7 +195,8 @@ int bgHttpServerImp::OnStart()
 			USES_CONVERSION;
 			LPCTSTR errstr = ::HP_Server_GetLastErrorDesc(http_server_);
 			errCode = ::HP_Server_GetLastError(http_server_);
-			std::cout<<"Start HTTP Server failed. "<<T2A(errstr)<<". errcode : "<<errCode<<std::endl;
+			sprintf_s(msg, 4096, "Start HTTP Server failed. : %s, errcode : %d.", T2A(errstr), errCode);
+			LOG4CXX_ERROR(rootLogger, msg);
 			return errCode;
 		}
 	}
@@ -181,6 +209,9 @@ int bgHttpServerImp::OnStart()
 			// 错误描述
 			::HP_Server_GetLastErrorDesc(https_server_);
 			errCode = ::HP_Server_GetLastError(https_server_);
+
+			sprintf_s(msg, 4096, "Start HTTPS Server failed. : %s, errcode : %d.", T2A(errstr), errCode);
+			LOG4CXX_ERROR(rootLogger, msg);
 
 			::HP_Server_Stop(http_server_);
 		}
@@ -222,68 +253,66 @@ void bgHttpServerImp::OnDestroy()
 En_HP_HandleResult __stdcall bgHttpServerImp::OnPrepareListen(HP_Server pSender, SOCKET soListen)
 {
 	// 什么都不做，直接返回OK
-	std::cout<<"bgHttpServerImp::OnPrepareListen"<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnAccept(HP_Server pSender, HP_CONNID dwConnID, SOCKET soClient)
 {
 	// 这里是指有客户端连进来的情况
-	std::cout<<"bgHttpServerImp::OnAccept connect_id : "<<dwConnID<<std::endl;
+	// 如果能拿到客户端的IP和端口最好
+	char msg[4096] = {0};
+	sprintf_s(msg, 4096, "There is a client connected.. connect_id is %d", dwConnID);
+	LOG4CXX_INFO(rootLogger, msg);
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnHandShake(HP_Server pSender, HP_CONNID dwConnID)
 {
+	// 握手回调
 	// 什么都不做，直接返回OK
-	std::cout<<"bgHttpServerImp::OnHandShake connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	// 这里是指接收数据
-	std::cout<<"bgHttpServerImp::OnReceive connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnSend(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	// 这里是指发送数据
-	std::cout<<"bgHttpServerImp::OnSend connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnClose(HP_Server pSender, HP_CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	// 这里是指关闭
-	std::cout<<"bgHttpServerImp::OnClose connect_id : "<<dwConnID<<std::endl;
+	char msg[4096] = {0};
+	sprintf_s(msg, 4096, "There is a client closed.. connect_id is %d", dwConnID);
+	LOG4CXX_INFO(rootLogger, msg);
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnShutdown(HP_Server pSender)
 {
 	// 什么都不做，直接返回OK
-	std::cout<<"bgHttpServerImp::OnShutdown"<<std::endl;
 	return HR_OK;
 }
 
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageBegin(HP_HttpServer pSender, HP_CONNID dwConnID)
 {
-	std::cout<<"bgHttpServerImp::OnMessageBegin connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
 }
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnRequestLine(HP_HttpServer pSender, HP_CONNID dwConnID, LPCSTR lpszMethod, LPCSTR lpszUrl)
 {
-	std::cout<<"bgHttpServerImp::OnRequestLine connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
 }
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnHeader(HP_HttpServer pSender, HP_CONNID dwConnID, LPCSTR lpszName, LPCSTR lpszValue)
 {
-	std::cout<<"bgHttpServerImp::OnHeader connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
 }
 
@@ -353,7 +382,10 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnChunkComplete(HP_HttpServer p
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
 {
-	std::cout<<"bgHttpServerImp::OnMessageComplete connect_id : "<<dwConnID<<std::endl;
+	char msg[4096] = {0};
+	sprintf_s(msg, 4096, "There is a client request will be handled.. connect_id is %d", dwConnID);
+	LOG4CXX_INFO(rootLogger, msg);
+
 	// 消息接收完成，取出调用的Object，分发到所有的处理插件中
 	USES_CONVERSION;
 
@@ -374,7 +406,6 @@ En_HP_HttpParseResult __stdcall bgHttpServerImp::OnMessageComplete(HP_HttpServer
 	{
 		if (plugin->IsMyMsg(dwConnID, method, path))
 		{
-HANDLE_REQUEST:
 			// 处理请求
 			errCode = plugin->HandleRequest(dwConnID, method, path, &response_data, &response_len, query);
 			is_handled = true;
@@ -386,14 +417,13 @@ HANDLE_REQUEST:
 			{
 				En_HP_SocketError err = ::HP_Server_GetLastError(pSender);
 				LPCTSTR errstr = ::HP_GetSocketErrorDesc(err);
-				std::cout<<"SendResponse failed... "<<errstr<<" errCode : "<<err<<std::endl;
+
+				sprintf_s(msg, 4096, "Send response failed. %s, errCode : %d, connect_id is %d", errstr, err dwConnID);
+				LOG4CXX_WARN(rootLogger, msg);
 			}
 
 			// 清理应答数据
 			plugin->CleanupResponseData(dwConnID, method, &response_data);
-
-			if (errCode == 1)
-				goto HANDLE_REQUEST;
 
 			// 如果没有保持连接的头参数，那么我们就释放掉连接
 			if(!::HP_HttpServer_IsKeepAlive(pSender, dwConnID))
@@ -419,31 +449,26 @@ HANDLE_REQUEST:
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnUpgrade(HP_HttpServer pSender, HP_CONNID dwConnID, EnHttpUpgradeType enUpgradeType)
 {
-	std::cout<<"bgHttpServerImp::OnUpgrade connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
 }
 
 En_HP_HttpParseResult __stdcall bgHttpServerImp::OnParseError(HP_HttpServer pSender, HP_CONNID dwConnID, int iErrorCode, LPCSTR lpszErrorDesc)
 {
-	std::cout<<"bgHttpServerImp::OnParseError connect_id : "<<dwConnID<<std::endl;
 	return HPR_OK;
 }
 
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageHeader(HP_HttpServer pSender, HP_CONNID dwConnID, BOOL bFinal, BYTE iReserved, BYTE iOperationCode, const BYTE lpszMask[4], ULONGLONG ullBodyLen)
 {
-	std::cout<<"bgHttpServerImp::OnWSMessageHeader connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageBody(HP_HttpServer pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	std::cout<<"bgHttpServerImp::OnWSMessageBody connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }
 
 En_HP_HandleResult __stdcall bgHttpServerImp::OnWSMessageComplete(HP_HttpServer pSender, HP_CONNID dwConnID)
 {
-	std::cout<<"bgHttpServerImp::OnWSMessageComplete connect_id : "<<dwConnID<<std::endl;
 	return HR_OK;
 }

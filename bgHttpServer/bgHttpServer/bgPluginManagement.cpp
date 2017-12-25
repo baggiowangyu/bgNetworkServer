@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "..\bgLogging\extern_logging.h"
+
 #include "bgPluginManagement.h"
 
 
@@ -16,12 +18,15 @@ bgPluginManagement::~bgPluginManagement()
 int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, std::string cfg_path)
 {
 	int errCode = 0;
+	char msg[4096] = {0};
 
 	// ¼ÓÔØ²å¼þ
 	HMODULE hMod = LoadLibraryA(path.c_str());
 	if (hMod == nullptr)
 	{
 		errCode = GetLastError();
+		sprintf_s(msg, 4096, "Load library %s failed... errcode : %d", path.c_str(), errCode);
+		LOG4CXX_WARN(rootLogger, msg);
 		return errCode;
 	}
 
@@ -31,6 +36,8 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, 
 	{
 		errCode = ERROR_NOT_FOUND;
 		FreeLibrary(hMod);
+		sprintf_s(msg, 4096, "Not found interface \"CreateObject\" in module %s", path.c_str());
+		LOG4CXX_WARN(rootLogger, msg);
 		return errCode;
 	}
 
@@ -39,6 +46,8 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, 
 	{
 		errCode = ERROR_NOT_FOUND;
 		FreeLibrary(hMod);
+		sprintf_s(msg, 4096, "Not found interface \"DestroyObject\" in module %s", path.c_str());
+		LOG4CXX_WARN(rootLogger, msg);
 		return errCode;
 	}
 
@@ -48,6 +57,8 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, 
 	{
 		errCode = ERROR_NOT_FOUND;
 		FreeLibrary(hMod);
+		sprintf_s(msg, 4096, "Create plugin \"%s\" instance failed", plugin_name.c_str());
+		LOG4CXX_WARN(rootLogger, msg);
 		return errCode;
 	}
 
@@ -57,6 +68,8 @@ int bgPluginManagement::InstallPlugin(std::string plugin_name,std::string path, 
 	{
 		ptr_DestroyObject(&plugin);
 		//FreeLibrary(hMod);
+		sprintf_s(msg, 4096, "Initialize plugin \"%s\" failed", plugin_name.c_str());
+		LOG4CXX_WARN(rootLogger, msg);
 		return errCode;
 	}
 
