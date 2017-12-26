@@ -1,0 +1,314 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(中华人民共和国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\ClientDemo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\ClientDemo.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG  0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "关于 ClientDemo"
+FONT 9, "宋体"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "ClientDemo 1.0 版",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "版权所有 (C) 2007",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_CLIENTDEMO_DIALOG DIALOGEX 0, 0, 794, 555
+STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "国迈科技车载终端"
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_SCREEN_WINDOW,"Static",SS_WHITEFRAME,0,0,648,427
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,652,0,138,109
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,652,112,138,68
+    PUSHBUTTON      "连接云台",IDC_BT_Login,658,72,60,32
+    PUSHBUTTON      "播放",IDC_BUTTON_Play,658,117,60,56,WS_DISABLED
+    PUSHBUTTON      "断开云台",IDC_BT_Leave,724,72,60,32,WS_DISABLED
+    RTEXT           "云台 IP:",IDC_STATIC,653,6,45,10
+    RTEXT           "云台端口:",IDC_STATIC,655,23,43,10
+    EDITTEXT        IDC_EDIT_Port,702,20,81,14,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "云台用户:",IDC_STATIC,655,39,43,11
+    EDITTEXT        IDC_EDIT_UserName,702,36,81,14,ES_AUTOHSCROLL
+    RTEXT           "云台密码:",IDC_STATIC,654,56,44,12
+    EDITTEXT        IDC_EDIT_Password,702,53,81,14,ES_PASSWORD | ES_AUTOHSCROLL
+    RTEXT           "Channel:",IDC_STATIC,548,441,44,8,NOT WS_VISIBLE
+    RTEXT           "Screen:",IDC_STATIC,547,457,45,8,NOT WS_VISIBLE
+    CONTROL         "IPAddress1",IDC_DvrIPAddress,"SysIPAddress32",WS_TABSTOP,702,3,81,14
+    COMBOBOX        IDC_COMBO_DispNum,595,453,61,70,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "停止",IDC_BUTTON_STOP,724,117,60,56
+    COMBOBOX        IDC_COMBO_Channel,595,437,61,66,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,652,181,138,245
+    RTEXT           "移动幅度:",IDC_STATIC,656,193,44,8
+    PUSHBUTTON      "上",IDC_PTZ_UP,700,213,44,44,BS_FLAT
+    PUSHBUTTON      "下",IDC_PTZ_DOWN,700,303,44,44,BS_FLAT
+    PUSHBUTTON      "左上",IDC_PTZ_LEFTUP,655,213,44,44,BS_FLAT
+    PUSHBUTTON      "右上",IDC_PTZ_RIGHTUP,745,213,44,44,BS_FLAT
+    PUSHBUTTON      "左下",IDC_PTZ_LEFTDOWN,655,303,44,44,BS_FLAT
+    PUSHBUTTON      "右下",IDC_PTZ_RIGHTDOWN,745,303,44,44,BS_FLAT
+    PUSHBUTTON      "左",IDC_PTZ_LEFT,655,258,44,44,BS_FLAT
+    PUSHBUTTON      "右",IDC_PTZ_RIGHT,745,258,44,44,BS_FLAT
+    PUSHBUTTON      "-",IDC_ZOOM_WIDE,657,354,39,26,BS_FLAT
+    CTEXT           "倍数",IDC_STATIC,667,384,17,8
+    PUSHBUTTON      "+",IDC_ZOOM_TELE,657,396,39,26,BS_FLAT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,655,351,43,73
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,700,351,43,73
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,745,351,43,73
+    PUSHBUTTON      "-",IDC_FOCUS_NEAR,702,354,39,26,BS_FLAT
+    PUSHBUTTON      "-",IDC_IRIS_CLOSE,747,354,39,26,BS_FLAT
+    CTEXT           "焦距",IDC_STATIC,714,384,17,8
+    CTEXT           "光圈",IDC_STATIC,759,384,17,8
+    PUSHBUTTON      "+",IDC_FOCUS_FAR,702,396,39,26,BS_FLAT
+    PUSHBUTTON      "+",IDC_IRIS_OPEN,747,396,39,26,BS_FLAT
+    COMBOBOX        IDC_COMBO_PTZDATA,706,190,66,54,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CTEXT           "描述文字",IDC_PTZSTATUS,705,275,34,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_SEPERATOR,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,0,431,792,1
+    PUSHBUTTON      "PTZ",IDC_BTN_PTZMENU,681,463,35,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Advance>>",IDC_BTN_PTZEXCTRL,667,509,42,27,BS_MULTILINE | NOT WS_VISIBLE
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,12,435,137,118
+    RTEXT           "Preset Point:",IDC_STATIC,16,442,37,8
+    PUSHBUTTON      "Setup",IDC_PRESET_ADD,28,461,38,14,BS_FLAT
+    PUSHBUTTON      "Call",IDC_PRESET_SET,102,439,36,14,BS_FLAT
+    PUSHBUTTON      "Delete",IDC_PRESET_DELE,90,461,38,14,BS_FLAT
+    PUSHBUTTON      "Add Tour",IDC_CRUISE_ADD_POINT,25,509,50,14,BS_FLAT
+    RTEXT           "AutoTour:",IDC_STATIC,16,490,38,8
+    PUSHBUTTON      "Del Tour",IDC_CRUISE_DEL_POINT,85,509,50,14,BS_FLAT
+    PUSHBUTTON      "Del tour group",IDC_CRUISE_DEL_GROUP,45,528,72,14,BS_FLAT
+    PUSHBUTTON      "Start Tour",IDC_START_CRUISE,100,487,45,14,BS_FLAT
+    EDITTEXT        IDC_PRESET_DATA,57,439,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,12,480,135,1
+    EDITTEXT        IDC_CRUISE_GROUP,56,487,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,152,435,133,118
+    RTEXT           "Pattern:",IDC_STATIC,156,442,50,8
+    EDITTEXT        IDC_MODE_NO,209,439,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Program Start",IDC_MODE_SET_BEGIN,162,461,54,14,BS_FLAT
+    PUSHBUTTON      "Start Pattern",IDC_MODE_START,222,461,54,14,BS_FLAT
+    PUSHBUTTON      "Delete",IDC_MODE_SET_DELETE,189,482,63,14,BS_FLAT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,152,501,133,1
+    LTEXT           "Auto Scan:",IDC_STATIC,164,507,37,8
+    PUSHBUTTON      "Left Limit",IDC_LINE_SET_LEFT,164,519,50,14,BS_FLAT
+    PUSHBUTTON      "Right Limit",IDC_LINE_SET_RIGHT,222,519,50,14,BS_FLAT
+    PUSHBUTTON      "Start",IDC_LINE_START,193,536,50,14,BS_FLAT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,287,435,124,118
+    RTEXT           "SIT:",IDC_STATIC,293,502,54,8
+    LTEXT           "X:",IDC_STATIC,301,445,23,8
+    EDITTEXT        IDC_POS_X,333,442,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_POS_Y,333,456,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Y:",IDC_STATIC,301,459,23,8
+    LTEXT           "ZOOM:",IDC_STATIC,301,478,23,8
+    EDITTEXT        IDC_POS_ZOOM,333,475,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,415,435,116,118
+    PUSHBUTTON      "SIT",IDC_FAST_GO,355,500,50,14,BS_FLAT
+    RTEXT           "Auto pan:",IDC_STATIC,417,444,37,8
+    PUSHBUTTON      "Start",IDC_ROTATE_START,420,460,50,14,BS_FLAT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,421,484,109,1
+    RTEXT           "AUX No.:",IDC_STATIC,418,490,37,8
+    COMBOBOX        IDC_COMBO_AUX_NO,447,503,50,64,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Aux Open",IDC_AUX_OPEN,421,528,50,14,BS_FLAT
+    PUSHBUTTON      "Stop",IDC_ROTATE_STOP,480,460,50,14,BS_FLAT
+    PUSHBUTTON      "Aux Close",IDC_AUX_CLOSE,481,528,50,14,BS_FLAT
+    COMBOBOX        IDC_COMBO_PLAYMODE,595,469,61,46,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Play Type:",IDC_STATIC,548,473,44,8,NOT WS_VISIBLE
+    RTEXT           "Run info:",IDC_STATIC,552,497,45,8,NOT WS_VISIBLE
+    LTEXT           "normal",IDC_LAST_ERROR,600,497,88,8,NOT WS_VISIBLE
+    PUSHBUTTON      "EXACTGO",IDC_EXACT_GO,298,531,50,14,BS_FLAT
+    PUSHBUTTON      "RESETZERO",IDC_RESET,357,530,50,14,BS_FLAT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,295,522,109,1
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | SS_SUNKEN,295,491,109,1
+END
+
+IDD_CPtzMenu DIALOG  0, 0, 156, 73
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ptz Menu"
+FONT 10, "System"
+BEGIN
+    PUSHBUTTON      "Up",IDC_OPR_UP,40,7,29,14,BS_FLAT
+    PUSHBUTTON      "Right",IDC_OPR_RIGHT,69,22,29,14,BS_FLAT
+    PUSHBUTTON      "Left",IDC_OPR_LEFT,11,22,29,14,BS_FLAT
+    PUSHBUTTON      "Down",IDC_OPR_DOWN,40,37,29,14,BS_FLAT
+    PUSHBUTTON      "Enter Menu",IDC_OPR_OPENMENU,113,7,37,14,BS_FLAT
+    PUSHBUTTON      "Close Menu",IDC_OPR_CLOSEMENU,113,22,37,14,BS_FLAT
+    PUSHBUTTON      "Ok",IDC_OPR_OK,113,37,37,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDC_OPR_CANCEL,113,52,37,14,BS_FLAT
+END
+
+IDD_DIALOG_MULTIPLAY DIALOG  0, 0, 187, 108
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Multi_Preview"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,41,77,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,102,77,50,14
+    RTEXT           "Preview Num:",IDC_STATIC,11,18,55,8
+    COMBOBOX        IDC_COMBO_MULTI,77,15,72,59,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Start Channel:",IDC_STATIC,9,42,57,8
+    COMBOBOX        IDC_COMBO_BEGINCHANNEL,77,39,72,64,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "ProductVersion", "1, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_CLIENTDEMO_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 792
+        BOTTOMMARGIN, 554
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "About ClientDemo(&A)..."
+END
+
+#endif    // 中文(中华人民共和国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\ClientDemo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
