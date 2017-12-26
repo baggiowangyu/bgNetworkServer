@@ -1,37 +1,49 @@
 #include "StreamPusherManagement.h"
 #include "winternl.h"
 
+#include <tchar.h>
+#include <Tlhelp32.h>
+
 
 typedef NTSTATUS  (WINAPI *NtQueryInformationProcessFake)(HANDLE, DWORD, PVOID, ULONG, PULONG);  
 NtQueryInformationProcessFake ntQ = NULL;  
 
+bool getProcCMD(DWORD pid, wchar_t cmdline_buffer[409600])
+{
+	bool b = false;
+	HANDLE process_handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid );
+	if (INVALID_HANDLE_VALUE != process_handle)
+	{
+		HANDLE hnewdup = NULL;
+		PEB peb;
+		RTL_USER_PROCESS_PARAMETERS upps;
 
-void getProcCMD(DWORD pid) {  
-	HANDLE hproc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid );  
-	if (INVALID_HANDLE_VALUE != hproc){  
-		HANDLE hnewdup = NULL;  
-		PEB peb;  
-		RTL_USER_PROCESS_PARAMETERS upps;  
-		WCHAR buffer[MAX_PATH] = {NULL};  
-		HMODULE hm = LoadLibrary(_T("Ntdll.dll"));  
-		ntQ = (NtQueryInformationProcessFake)GetProcAddress(hm, "NtQueryInformationProcess");  
-		if ( DuplicateHandle(GetCurrentProcess(), hproc, GetCurrentProcess(), &hnewdup, 0, FALSE, DUPLICATE_SAME_ACCESS) ) {  
-			PROCESS_BASIC_INFORMATION pbi;  
-			NTSTATUS isok = ntQ(hnewdup, 0/*ProcessBasicInformation*/, (PVOID)&pbi, sizeof(PROCESS_BASIC_INFORMATION), 0);          
-			if (BCRYPT_SUCCESS(isok)) {  
-				if ( ReadProcessMemory(hnewdup, pbi.PebBaseAddress, &peb, sizeof(PEB), 0) )  
-					if ( ReadProcessMemory(hnewdup, peb.ProcessParameters, &upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0) ) {  
-						WCHAR *buffer = new WCHAR[upps.CommandLine.Length + 1];  
-						ZeroMemory(buffer, (upps.CommandLine.Length + 1) * sizeof(WCHAR));  
-						ReadProcessMemory(hnewdup, upps.CommandLine.Buffer, buffer, upps.CommandLine.Length, 0);  
-						delete buffer;  
-					}  
-			}  
-			CloseHandle(hnewdup);  
-		}  
+		HMODULE hm = LoadLibrary(_T("Ntdll.dll"));
+		ntQ = (NtQueryInformationProcessFake)GetProcAddress(hm, "NtQueryInformationProcess");
 
-		CloseHandle(hproc);  
+		BOOL bret = DuplicateHandle(GetCurrentProcess(), process_handle, GetCurrentProcess(), &hnewdup, 0, FALSE, DUPLICATE_SAME_ACCESS);
+		if (!bret)
+		{
+			CloseHandle(process_handle);
+			return b;
+		}
+
+		PROCESS_BASIC_INFORMATION pbi;
+		NTSTATUS isok = ntQ(hnewdup, 0/*ProcessBasicInformation*/, (PVOID)&pbi, sizeof(PROCESS_BASIC_INFORMATION), 0);
+		if (BCRYPT_SUCCESS(isok))
+		{
+			if ( ReadProcessMemory(hnewdup, pbi.PebBaseAddress, &peb, sizeof(PEB), 0))
+				if ( ReadProcessMemory(hnewdup, peb.ProcessParameters, &upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0))
+				{
+					ZeroMemory(cmdline_buffer, (upps.CommandLine.Length + 1) * sizeof(WCHAR));
+					ReadProcessMemory(hnewdup, upps.CommandLine.Buffer, cmdline_buffer, upps.CommandLine.Length, 0);
+					b = true;
+				}
+		}
+		CloseHandle(hnewdup);
 	}
+
+	return b;
 }
 
 DWORD WINAPI WorkingThread(LPVOID lpParam)
@@ -106,16 +118,16 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 
 	char param[4096] = {0};
 	if (_stricmp("rtsp", protocol) == 0)
-		sprintf_s(param, 4096, "-i %s -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp %s://%s:%s/%s", source_url, protocol, target_ip, target_port, stream_name);
+		sprintf_s(param, 4096, "-i %s -vcodec copy -acodec copy -rtsp_transport tcp -f rtsp %s://%s:%s/%s", source_url, protocol, target_ip, target_port, stream_name);
 	else
 		return ERROR_NOT_SUPPORTED;
 
-	// 检查当前是否存在一个ffmpeg正在执行推流
+	// 检查当前是否存在一个ffmpeg正在执行推流，每个用于推流的ffmpeg都赋予不同的文件名
 	// 找到该进程，查询命令行，如果命令行参数与我们要执行的一致，那么我们只要守护住对应的进程句柄即可
 	// 如果没有找到一致的，那么我们就创建一个新的推流进程
 	if (IsExistPusher(param))
 	{
-		return 0;
+		// 什么都不干
 	}
 	else
 	{
@@ -124,7 +136,7 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 		memset(&shell_info_, 0, sizeof(SHELLEXECUTEINFOA));
 		shell_info_.cbSize = sizeof(SHELLEXECUTEINFOA);
 		shell_info_.fMask = SEE_MASK_NOCLOSEPROCESS;
-		shell_info_.lpFile = "ffmpeg.exe";
+		shell_info_.lpFile = "bgCarStreamPusher.exe";
 		shell_info_.lpParameters = param;
 		shell_info_.lpVerb = "open";
 		shell_info_.nShow = SW_SHOW;
@@ -137,12 +149,13 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 		}
 
 		pusher_handle_ = shell_info_.hProcess;
-		working_ = CreateThread(NULL, 0, WorkingThread, this, 0, NULL);
-		if (!working_)
-		{
-			errCode = GetLastError();
-			return errCode;
-		}
+	}
+
+	working_ = CreateThread(NULL, 0, WorkingThread, this, 0, NULL);
+	if (!working_)
+	{
+		errCode = GetLastError();
+		return errCode;
 	}
 
 	return 0;
@@ -158,5 +171,42 @@ void StreamPusherManagement::StopPush()
 
 bool StreamPusherManagement::IsExistPusher(const char *commandline)
 {
-	// 首先，查找进程名为ffmpeg.exe的程序
+	bool bret = false;
+	// 首先，查找进程名为bgCarStreamPusher.exe的程序
+	// 找得到说明正在推流
+
+	HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if(hSnapShot == INVALID_HANDLE_VALUE)
+		return bret;
+
+	PROCESSENTRY32 pe;
+	pe.dwSize = sizeof(PROCESSENTRY32);
+	if (!Process32First(hSnapShot, &pe))
+		return bret;
+
+	do 
+	{
+		TCHAR *process_name = pe.szExeFile;
+
+		if (_tcsicmp(process_name, _T("bgCarStreamPusher.exe")) == 0)
+		{
+			bret = true;
+
+			// 找到了对应的进程，然后尝试提取
+			DWORD process_id = pe.th32ProcessID;
+			wchar_t commandline[409600] = {0};
+			BOOL bret = getProcCMD(process_id, commandline);
+			if (!bret)
+				break;
+
+			// 这里验证输入的命令行是否是查询到的命令行的子集
+
+			// 验证通过，打开进程句柄，保存下来，这里我们采用最小权限，即等待权限
+			pusher_handle_ = OpenProcess(SYNCHRONIZE, FALSE, process_id);
+
+			break;
+		}
+	} while (Process32Next(hSnapShot, &pe));
+
+	return bret;
 }
