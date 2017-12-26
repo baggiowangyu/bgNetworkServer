@@ -25,7 +25,7 @@
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
@@ -56,7 +56,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile=".\Debug/ClientDemo.pch"
@@ -179,6 +179,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="dhnetsdk.lib  dhconfigsdk.lib"
 				OutputFile="$(OutDir)\ClientDemo.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -220,7 +221,7 @@
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
@@ -251,7 +252,7 @@
 				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
@@ -276,10 +277,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dhplay.lib dhnetsdk.lib"
-				OutputFile=".\Release/ClientDemo.exe"
+				AdditionalDependencies="dhnetsdk.lib  dhconfigsdk.lib"
+				OutputFile=".\Release/GMCarTerminal.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="./Lib_32"
 				ProgramDatabaseFile=".\Release/ClientDemo.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -373,10 +375,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="dhnetsdk.lib  dhconfigsdk.lib"
 				OutputFile="$(OutDir)\ClientDemo.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories=".\Lib_64"
 				ProgramDatabaseFile=".\Release/ClientDemo.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"

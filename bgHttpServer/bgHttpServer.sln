@@ -4,6 +4,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bgHttpServer", "bgHttpServer\bgHttpServer.vcxproj", "{9F987AD0-6645-469E-87A6-41BEBC2035CF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F2B1362D-BB45-455B-8DCA-AFB0A79C2E60} = {F2B1362D-BB45-455B-8DCA-AFB0A79C2E60}
+		{D5152287-AB46-407C-811C-FC58B2CC8055} = {D5152287-AB46-407C-811C-FC58B2CC8055}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "业务插件（HTTP业务处理模块）", "业务插件（HTTP业务处理模块）", "{67773A47-3205-41F2-BFE9-CAD2CFBFF5C0}"
