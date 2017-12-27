@@ -139,7 +139,7 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 		shell_info_.lpFile = "bgCarStreamPusher.exe";
 		shell_info_.lpParameters = param;
 		shell_info_.lpVerb = "open";
-		shell_info_.nShow = SW_SHOW;
+		shell_info_.nShow = SW_MINIMIZE;
 
 		BOOL bret = ShellExecuteExA(&shell_info_);
 		if (!bret)

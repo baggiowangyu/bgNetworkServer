@@ -97,6 +97,7 @@ int bgDeviceControl::CacheHttpContentData(unsigned long connect_id, const unsign
 
 int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method, const char *path, unsigned char **response_data, int *response_len, const char *query /* = nullptr */)
 {
+	char msg[409600] = {0};
 	int errCode = 0;
 
 	if (_stricmp("GET", method) == 0)
@@ -126,9 +127,8 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			std::string request_data = (const char *)cmddata.cmddata_;
 
 			// 输出缓冲
-			std::cout<<"Start handle request : "<<std::endl;
-			std::cout<<request_data.c_str()<<std::endl;
-			//BG_LOG_INFO()
+			sprintf_s(msg, 409600, "Handle request :", request_data.c_str());
+			BG_LOG_INFO(msg);
 
 			// 将请求数据转换为json对象进行处理
 			// 由于我们这里是服务器程序，要妥善处理异常情况，这里应当使用防御式编程
@@ -221,7 +221,8 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 					Json::StyledWriter sw;
 					std::string result_data = sw.write(result);
 
-					std::cout<<result_data.c_str()<<std::endl;
+					sprintf_s(msg, 409600, "Response data : %s", result_data.c_str());
+					BG_LOG_INFO(msg);
 
 					if (response_len)
 					{

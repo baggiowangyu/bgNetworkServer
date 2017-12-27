@@ -1,0 +1,41 @@
+=================================================================
+bgHttpServer 配置文件 config.ini 配置项说明
+=================================================================
+
+## 服务信息
+[SERVER_INFO]
+PLUGINS=1      # 插件应用数量
+USE_HTTP=1     # HTTP服务：1-开启；0-关闭
+USE_HTTPS=0    # HTTPS服务：1-开启；0-关闭
+
+## HTTP服务配置
+[HTTP_SERVICE]
+IP=0.0.0.0     # 绑定的IP地址，0.0.0.0：绑定本机所有IP
+PORT=6789      # 监听端口
+
+## HTTPS服务配置
+[HTTPS_SERVICE]
+IP=0.0.0.0     # 绑定的IP地址，0.0.0.0：绑定本机所有IP
+PORT=7890      # 监听端口
+
+## 流媒体服务器配置（EasyDarwin配置）
+[STREAM_SERVER]
+PROTOCOL=RTSP  # 流媒体服务协议，默认为RTSP
+IP=127.0.0.1   # 流媒体服务器地址，如果是本机，则填127.0.0.1
+PORT=554       # 流媒体服务器提供服务的端口号
+
+## 插件0信息
+[PLUGINS_0]
+NAME=DeviceControl          # 插件名称
+BINARY=bgDeviceControl.dll  # 插件DLL，用于服务框架加载
+
+## 大华设备信息
+[DH_DEV]
+DEV_IP=192.168.1.108   # 大华球机IP地址，默认为291.168.1.108，若有改变，则调整为对应的IP
+DEV_PORT=37777         # 大华球机SDK端口，默认为37777
+DEV_USER=admin         # 大华球机登录账号，默认为admin
+DEV_PASS=admin         # 大华球机登录密码，默认为admin
+AUTO_REALSTREAM=1      # 自动推流，1-开启，默认值；0-关闭
+SOURCE_STREAM=rtsp://admin:admin@192.168.1.108/         # 大华球机源视频流地址，组成方式为：RTSP://[DEV_USER]:[DEV_PASS]@[DEV_IP]/，有修改的部分需要进行对应的替换
+TARGET_STREAM_NAME=car_video.sdp                        # 推流文件，固定为car_video.sdp
+TARGET_STREAM_URL=rtsp://10.10.16.11:554/car_video.sdp  # 拉流日志，组成方式为：RTSP://[STREAM_SERVER_IP]:[STREAM_SERVER_PORT]/[TARGET_STREAM_NAME]

@@ -33,6 +33,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	// 这里开始业务逻辑
 
+	// 打开一个互斥体，确保是单例模式
+	HANDLE mutex_handle = CreateMutex(nullptr, TRUE, _T("__GM_bgHttpServer__"));
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		// 已经存在一个实例了，当前服务进程退出
+		return 0;
+	}
+
 	// 检查是否以调试模式启动
 	if (commandline.HasSwitch("debug"))
 		MessageBoxA(nullptr, "等待调试器接入", "调试启动", MB_ICONWARNING|MB_OK);

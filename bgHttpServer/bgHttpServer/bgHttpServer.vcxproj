@@ -61,7 +61,7 @@
     </Link>
     <PostBuildEvent>
       <Command>COPY $(ProjectDir)config.ini $(OutDir)
-COPY $(ProjectDir)log4cxx.propertise $(OutDir)
+COPY $(ProjectDir)log4cxx.properties $(OutDir)
 XCOPY /D /Y $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\google\chromium\bin\x86\Debug\base.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\log4cxx\bin\x86\Debug\log4cxx.dll $(OutDir)</Command>
@@ -89,7 +89,7 @@ XCOPY /D /Y $(SolutionDir)\ext\log4cxx\bin\x86\Debug\log4cxx.dll $(OutDir)</Comm
     </Link>
     <PostBuildEvent>
       <Command>COPY $(ProjectDir)config.ini $(OutDir)
-COPY $(ProjectDir)log4cxx.propertise $(OutDir)
+COPY $(ProjectDir)log4cxx.properties $(OutDir)
 XCOPY /D /Y $(SolutionDir)ext\HP-Socket\lib\x86\HPSocket4C-SSL_U.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\google\chromium\bin\x86\Release\base.dll $(OutDir)
 XCOPY /D /Y $(SolutionDir)\ext\log4cxx\bin\x86\Release\log4cxx.dll $(OutDir)</Command>
@@ -99,6 +99,8 @@ XCOPY /D /Y $(SolutionDir)\ext\log4cxx\bin\x86\Release\log4cxx.dll $(OutDir)</Co
     <None Include="config.ini" />
     <None Include="log4cxx.properties" />
     <None Include="ReadMe.txt" />
+    <None Include="部署说明.txt" />
+    <None Include="配置文件说明.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgHttpBusinessPlugins.h" />

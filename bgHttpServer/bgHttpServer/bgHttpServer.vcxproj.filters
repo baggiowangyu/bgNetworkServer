@@ -30,6 +30,8 @@
     <None Include="ReadMe.txt" />
     <None Include="config.ini" />
     <None Include="log4cxx.properties" />
+    <None Include="配置文件说明.txt" />
+    <None Include="部署说明.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

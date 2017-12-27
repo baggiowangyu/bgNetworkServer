@@ -1,0 +1,19 @@
+==================================================================
+国迈科技车载网关部署说明
+==================================================================
+1. 文件列表
+  - bgWatchDog.exe			# 看门狗程序，用于启动车载网关
+  - bgCarStreamPusher.exe   # 推流器
+  - bgHttpServer.exe        # 车载网关主程序
+  - bgDeviceControl.dll     # 车载网关业务插件
+  - base.dll                # Google Chromium 基础库
+  - dhnetsdk.dll            # 大华网络摄像机SDK
+  - HPSocket4C-SSL_U.dll    # 网络模块
+  - log4cxx.dll             # 日志模块
+  - config.ini              # 车载网关配置文件
+  - log4cxx.properties      # 日志模块配置文件
+
+2. 部署方式
+  - 上述文件列表放在同一个目录内
+  - 将 bgWatchDog.exe 加入系统启动项
+  - 双击运行 bgWatchDog.exe 启动车载网关
