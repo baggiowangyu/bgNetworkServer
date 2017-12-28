@@ -218,7 +218,7 @@ BOOL CClientDemoDlg::OnInitDialog()
 							RectEventFunc,(LDWORD)this);
 	m_ptzScreen.SetShowPlayWin(SPLIT1,0);
 	//Set initial IP address 
-	m_DvrIPAddr.SetAddress(192,168,1,108);
+	m_DvrIPAddr.SetAddress(172,18,100,8);
 	//Zoom dialogux box 
 	CRect rectSeparator;
 	GetWindowRect(&m_rectLarge);
