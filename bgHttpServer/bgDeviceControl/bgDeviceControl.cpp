@@ -2,6 +2,9 @@
 //
 
 #include "stdafx.h"
+
+#include "base/file_util.h"
+
 #include "bgDeviceControl.h"
 #include "bgDaHuaDeviceControl.h"
 #include "bgLogging.h"
@@ -27,6 +30,19 @@ bgDeviceControl::~bgDeviceControl()
 int bgDeviceControl::Init(const char *config_ini)
 {
 	int errCode = 0;
+
+	// 得到当前程序所在目录
+	base::FilePath current_dirctory;
+	bool bret = file_util::GetCurrentDirectory(&current_dirctory);
+	if (!bret)
+	{
+		std::cout<<"Get current directory failed..."<<std::endl;
+		return -1;
+	}
+
+	// 读取日志模块配置文件
+	base::FilePath log4cxx_properties = current_dirctory.AppendASCII("log4cxx.properties");
+	BG_LOG_INIT(log4cxx_properties.value());
 
 	// 为每一个设备调用初始化接口
 	errCode = dahua_device_->OnInit(config_ini);
@@ -127,7 +143,7 @@ int bgDeviceControl::HandleRequest(unsigned long connect_id, const char *method,
 			std::string request_data = (const char *)cmddata.cmddata_;
 
 			// 输出缓冲
-			sprintf_s(msg, 409600, "Handle request :", request_data.c_str());
+			sprintf_s(msg, 409600, "Handle request : %s", request_data.c_str());
 			BG_LOG_INFO(msg);
 
 			// 将请求数据转换为json对象进行处理
