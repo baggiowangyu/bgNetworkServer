@@ -51,12 +51,18 @@ DWORD WINAPI WorkingThread(LPVOID lpParam)
 	StreamPusherManagement *pusher = (StreamPusherManagement*)lpParam;
 	pusher->is_working_ = true;
 
+	// 这里的线程要严格管理，只能有一条，如果多了就退出
+	if (pusher->is_have_thread_)
+		return 0;
+
+	pusher->is_have_thread_ = true;
+
 	while (true)
 	{
 		if (!pusher->is_working_)
 			break;
 
-		DWORD ret = WaitForSingleObject(pusher->shell_info_.hProcess, 1000);
+		DWORD ret = WaitForSingleObject(pusher->pusher_handle_, 100);
 		if (ret == WAIT_FAILED)
 		{
 			// 等待失败，可能是进程退出了
@@ -92,6 +98,7 @@ DWORD WINAPI WorkingThread(LPVOID lpParam)
 		}
 	}
 
+	pusher->is_have_thread_ = false;
 	return 0;
 }
 
@@ -99,6 +106,7 @@ StreamPusherManagement::StreamPusherManagement()
 	: working_(nullptr)
 	, keep_push_(true)
 	, is_working_(false)
+	, is_have_thread_(false)
 {
 
 }
@@ -116,6 +124,8 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 	target_url_ = target_ip;
 	keep_push_ = keep_push;
 
+	// 这里需要检查流媒体是否启动，如果没启动，推流器推流会出现问题
+
 	char param[4096] = {0};
 	if (_stricmp("rtsp", protocol) == 0)
 		sprintf_s(param, 4096, "-i %s -vcodec copy -acodec copy -rtsp_transport tcp -f rtsp %s://%s:%s/%s", source_url, protocol, target_ip, target_port, stream_name);
@@ -132,6 +142,9 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 	}
 	else
 	{
+		// 防止设备连接上有延时，这里等3秒
+		Sleep(3000);
+
 		// 在这里启动推流器，然后开线程来守推流器
 		// 如果开启了持续推流
 		memset(&shell_info_, 0, sizeof(SHELLEXECUTEINFOA));
@@ -167,7 +180,7 @@ void StreamPusherManagement::StopPush()
 	is_working_ = false;
 
 	// 结束进程
-	TerminateProcess(shell_info_.hProcess, 4);
+	TerminateProcess(pusher_handle_, 4);
 }
 
 bool StreamPusherManagement::IsExistPusher(const char *commandline)

@@ -105,7 +105,7 @@ bgDahuaDeviceControl::bgDahuaDeviceControl(bgDahuaDeviceRealStreamNotifer *notif
 {
 	// 这里实际上还要做设备断线回调
 	// 回调中需要开启尝试重新登录的功能
-	CLIENT_Init(NULL, 0);
+	CLIENT_Init(_fDisConnect, (DWORD)this);
 }
 
 bgDahuaDeviceControl::~bgDahuaDeviceControl()
@@ -155,10 +155,20 @@ int bgDahuaDeviceControl::OnInit(const char *config_ini)
 	target_stream_url_ = target_stream_url;
 
 	// 登录
-	int errCode = OnLogin(ip, port, username, password);
-	if (errCode != 0)
-		return errCode;
+	int errCode = 0;
+	while (true)
+	{
+		errCode = OnLogin(ip, port, username, password);
+		if (errCode != 0)
+		{
+			OnStopRealPlay();
+			Sleep(100);
+			continue;
+		}
 
+		break;
+	}
+	
 	// 开启点流
 	if (auto_realstream)
 		errCode = OnStartRealPlay();

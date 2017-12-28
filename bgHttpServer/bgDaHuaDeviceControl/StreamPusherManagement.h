@@ -33,6 +33,7 @@ public:
 	std::string target_url_;
 	bool keep_push_;
 	bool is_working_;
+	bool is_have_thread_;
 
 private:
 	HANDLE working_;
