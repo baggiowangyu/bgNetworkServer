@@ -22,6 +22,7 @@
     <None Include="bgDeviceControl.def">
       <Filter>源文件</Filter>
     </None>
+    <None Include="bgDeviceControl.properties" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

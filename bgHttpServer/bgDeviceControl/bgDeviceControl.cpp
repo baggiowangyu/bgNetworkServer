@@ -41,7 +41,7 @@ int bgDeviceControl::Init(const char *config_ini)
 	}
 
 	// 读取日志模块配置文件
-	base::FilePath log4cxx_properties = current_dirctory.AppendASCII("log4cxx.properties");
+	base::FilePath log4cxx_properties = current_dirctory.AppendASCII("bgDeviceControl.properties");
 	BG_LOG_INIT(log4cxx_properties.value());
 
 	// 为每一个设备调用初始化接口
