@@ -88,6 +88,8 @@ public:
 
 public:
 	bgDahuaDeviceRealStreamNotifer *notifer_;
+	std::string config_path_;
+	bool is_device_connected_;
 
 private:
 	std::string device_ip_;

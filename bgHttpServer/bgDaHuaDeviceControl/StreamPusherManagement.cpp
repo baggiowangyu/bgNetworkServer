@@ -122,6 +122,7 @@ int StreamPusherManagement::StartPush(const char *source_url, const char *target
 	else
 		return ERROR_NOT_SUPPORTED;
 
+	// -i rtsp://admin:admin@172.18.100.8/ -vcodec copy -acodec copy -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:554/car_video.sdp
 	// 检查当前是否存在一个ffmpeg正在执行推流，每个用于推流的ffmpeg都赋予不同的文件名
 	// 找到该进程，查询命令行，如果命令行参数与我们要执行的一致，那么我们只要守护住对应的进程句柄即可
 	// 如果没有找到一致的，那么我们就创建一个新的推流进程

@@ -60,7 +60,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			shell_info_.cbSize = sizeof(SHELLEXECUTEINFO);
 			shell_info_.fMask = SEE_MASK_NOCLOSEPROCESS;
 			shell_info_.lpFile = watch_process_name;
-			shell_info_.lpVerb = _T("open");
+			shell_info_.lpVerb = _T("runas");
 			shell_info_.nShow = SW_MINIMIZE;
 
 			BOOL bret = ShellExecuteEx(&shell_info_);

@@ -8,6 +8,38 @@
 
 #define TEST_WRITEFILE
 
+//////////////////////////////////////////////////////////////////////////
+//
+// 设备登录断线回调
+//
+//////////////////////////////////////////////////////////////////////////
+
+void CALLBACK _fDisConnect(LLONG lLoginID, char *pchDVRIP, LONG nDVRPort, LDWORD dwUser)
+{
+	bgDahuaDeviceControl *device_control = (bgDahuaDeviceControl*)dwUser;
+
+	// 断开推流
+	device_control->OnStopRealPlay();
+
+	// 连接状态设置为断开连接
+	device_control->is_device_connected_ = false;
+
+	// 尝试重新登录，直到登录成功
+	while (true)
+	{
+		int errCode = device_control->OnInit(device_control->config_path_.c_str());
+		if (errCode == 0)
+			break;
+	}
+	
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//////////////////////////////////////////////////////////////////////////
+
 void CALLBACK _fRealDataCallBackEx(LLONG lRealHandle, DWORD dwDataType, BYTE *pBuffer, DWORD dwBufSize, LONG param, LDWORD dwUser)
 {
 	bgDahuaDeviceControl *device_control = (bgDahuaDeviceControl *)dwUser;
@@ -69,7 +101,10 @@ bgDahuaDeviceControl::bgDahuaDeviceControl(bgDahuaDeviceRealStreamNotifer *notif
 	, move_speed_(4)
 	, cache_data_len_(0)
 	, stream_pusher_management_(new StreamPusherManagement())
+	, is_device_connected_(false)
 {
+	// 这里实际上还要做设备断线回调
+	// 回调中需要开启尝试重新登录的功能
 	CLIENT_Init(NULL, 0);
 }
 
@@ -82,6 +117,8 @@ bgDahuaDeviceControl::~bgDahuaDeviceControl()
 int bgDahuaDeviceControl::OnInit(const char *config_ini)
 {
 	// 读取配置文件
+	config_path_ = config_ini;
+
 	char ip[4096] = {0};
 	unsigned short port = 0;
 	char username[4096] = {0};
@@ -145,6 +182,8 @@ int bgDahuaDeviceControl::OnLogin(const char *device_ip, unsigned short device_p
 		return -1;
 	}
 
+	is_device_connected_ = true;
+
 	// 登录成功后，查询设备状态
 	// 我们还可以做一些事情：
 	//  - 校时
@@ -162,6 +201,9 @@ int bgDahuaDeviceControl::OnLogout()
 
 int bgDahuaDeviceControl::OnPTZControl(const char *cmdtype, const char *cmd, int param1, int param2, int param3, BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	// 先设置运动速度
 	move_speed_ = param2;
 
@@ -223,6 +265,9 @@ int bgDahuaDeviceControl::OnPTZControl(const char *cmdtype, const char *cmd, int
 
 int bgDahuaDeviceControl::OnPTZControl_TurnUp(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_UP_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -233,6 +278,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnUp(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnUpRight(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_EXTPTZ_RIGHTTOP, move_speed_, move_speed_, 0, stop);
 
 	if (!bret)
@@ -243,6 +291,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnUpRight(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnRight(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_RIGHT_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -253,6 +304,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnRight(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnDownRight(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_EXTPTZ_RIGHTDOWN, move_speed_, move_speed_, 0, stop);
 
 	if (!bret)
@@ -263,6 +317,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnDownRight(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnDown(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_DOWN_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -273,6 +330,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnDown(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnDownLeft(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_EXTPTZ_LEFTDOWN, move_speed_, move_speed_, 0, stop);
 
 	if (!bret)
@@ -283,6 +343,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnDownLeft(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnLeft(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_LEFT_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -293,6 +356,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnLeft(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_TurnUpLeft(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_EXTPTZ_LEFTTOP, move_speed_, move_speed_, 0, stop);
 
 	if (!bret)
@@ -303,6 +369,9 @@ int bgDahuaDeviceControl::OnPTZControl_TurnUpLeft(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_ZoomAdd(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_ZOOM_ADD_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -313,6 +382,9 @@ int bgDahuaDeviceControl::OnPTZControl_ZoomAdd(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_ZoomDec(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_ZOOM_DEC_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -323,6 +395,9 @@ int bgDahuaDeviceControl::OnPTZControl_ZoomDec(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_FocusAdd(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_FOCUS_ADD_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -333,6 +408,9 @@ int bgDahuaDeviceControl::OnPTZControl_FocusAdd(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_FocusDec(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_FOCUS_DEC_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -343,6 +421,9 @@ int bgDahuaDeviceControl::OnPTZControl_FocusDec(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_ApertureAdd(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_APERTURE_ADD_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -353,6 +434,9 @@ int bgDahuaDeviceControl::OnPTZControl_ApertureAdd(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnPTZControl_ApertureDec(BOOL stop /* = FALSE */)
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	BOOL bret = CLIENT_DHPTZControl(login_id_, 0, DH_PTZ_APERTURE_DEC_CONTROL, 0, move_speed_, 0, stop);
 
 	if (!bret)
@@ -363,6 +447,9 @@ int bgDahuaDeviceControl::OnPTZControl_ApertureDec(BOOL stop /* = FALSE */)
 
 int bgDahuaDeviceControl::OnStartRealPlay()
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	int errCode = 0;
 
 	//real_handle_ = CLIENT_StartRealPlay(login_id_, 0, nullptr, DH_RType_Realplay, _fRealDataCallBackEx, _fRealPlayDisConnect, (LDWORD)this);
@@ -380,6 +467,8 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 	// 成功之后，将信息送入推流器，准备推流
 	// 憋了一个超级大招，直接用ffmpeg拉流转发，由于车载端
 	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/ -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:554/dh_dvr.sdp
+	// 大华摄像头的rtsp拉流格式：rtsp://[username]:[password]@[ip]:[port]/cam/realmonitor?channel=1&subtype=0
+	// 海康摄像头的rtsp拉流格式：rtsp://[username]:[password]@[ip]:[port]/[codec]/[channel]/[subtype]/av_stream
 	// 参数：
 	// 1. ffmpeg.exe的完整路径
 	// 2. 摄像头登录账号、密码
@@ -393,6 +482,9 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 
 int bgDahuaDeviceControl::OnStopRealPlay()
 {
+	if (!is_device_connected_)
+		return ERROR_NOT_READY;
+
 	int errCode = 0;
 
 	stream_pusher_management_->is_working_ = false;
