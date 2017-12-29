@@ -476,7 +476,7 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 
 	// 成功之后，将信息送入推流器，准备推流
 	// 憋了一个超级大招，直接用ffmpeg拉流转发，由于车载端
-	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/ -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:554/dh_dvr.sdp
+	// ffmpeg.exe -i rtsp://admin:admin@192.168.1.108/cam/realmonitor?channel=1&subtype=0 -vcodec copy -acodec copy  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:554/dh_dvr.sdp
 	// 大华摄像头的rtsp拉流格式：rtsp://[username]:[password]@[ip]:[port]/cam/realmonitor?channel=1&subtype=0
 	// 海康摄像头的rtsp拉流格式：rtsp://[username]:[password]@[ip]:[port]/[codec]/[channel]/[subtype]/av_stream
 	// 参数：
@@ -484,8 +484,11 @@ int bgDahuaDeviceControl::OnStartRealPlay()
 	// 2. 摄像头登录账号、密码
 	// 3. 摄像头IP地址
 	// 4. 推流目标服务器地址
-	if (!stream_pusher_management_->is_working_)
-		errCode = stream_pusher_management_->StartPush(source_stream_url_.c_str(), stream_server_ip_.c_str(), stream_server_port_.c_str(), stream_server_protocol_.c_str(), target_stream_name_.c_str());
+
+	// modify by wangyu - 20171229
+	// 新方案，这里我们不再推流，让播放器直接到EasyDarwin上拉取RTSP流
+	//if (!stream_pusher_management_->is_working_)
+	//	errCode = stream_pusher_management_->StartPush(source_stream_url_.c_str(), stream_server_ip_.c_str(), stream_server_port_.c_str(), stream_server_protocol_.c_str(), target_stream_name_.c_str());
 
 	return errCode;
 }
